@@ -14,6 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TURBO_TELEMETRY_DISABLED: 1
+      DATABASE_URL: postgresql://helpdesk:helpdesk@localhost:5432/helpdesk
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: helpdesk
+          POSTGRES_PASSWORD: helpdesk
+          POSTGRES_DB: helpdesk
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U helpdesk -d helpdesk"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v7
 
@@ -32,7 +47,8 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
+      - name: Apply database migrations
+        run: pnpm --filter @helpdesk/api db:deploy
+
       - name: API e2e tests
         run: pnpm --filter @helpdesk/api test:e2e
-        env:
-          DATABASE_URL: postgresql://helpdesk:helpdesk@localhost:5432/helpdesk

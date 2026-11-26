@@ -15,7 +15,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:up": "docker compose up -d",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter @helpdesk/api db:generate",
+    "db:migrate": "pnpm --filter @helpdesk/api db:migrate",
+    "db:studio": "pnpm --filter @helpdesk/api db:studio"
   },
   "devDependencies": {
     "prettier": "catalog:",

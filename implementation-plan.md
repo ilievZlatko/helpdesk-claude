@@ -36,7 +36,7 @@ These are working assumptions, not final decisions. They can be revisited withou
 
 **Goal:** the seeded admin can log in and out; protected routes reject anonymous users.
 
-- [ ] 1.1 Add Prisma to `apps/api` and create `PrismaModule` / `PrismaService`
+- [x] 1.1 Add Prisma to `apps/api` and create `PrismaModule` / `PrismaService`
 - [ ] 1.2 Write the `User` model (email, name, password hash, role enum `admin | agent`, `isActive`, timestamps)
 - [ ] 1.3 Write the `Session` model (hashed token, user, `expiresAt`, `createdAt`)
 - [ ] 1.4 Create the first migration

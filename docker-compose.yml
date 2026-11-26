@@ -7,7 +7,8 @@ services:
       POSTGRES_PASSWORD: helpdesk
       POSTGRES_DB: helpdesk
     ports:
-      - '5432:5432'
+      # Host port 5433 avoids clashing with other local Postgres instances on 5432.
+      - '5433:5432'
     volumes:
       # Postgres 18+ images keep data under /var/lib/postgresql/<major>/,
       # so the volume is mounted at the parent directory.

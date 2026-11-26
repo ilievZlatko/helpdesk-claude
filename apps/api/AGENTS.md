@@ -27,4 +27,6 @@ Nest's packages are ESM only, and this project is ESM too: relative imports end 
 
 In this project, `src/main.ts` creates the app, sets the global `api` prefix, and listens on `PORT` (3000 by default). `src/app.module.ts` is the root module: it loads and validates environment variables (`src/config/env.ts`) and imports the feature modules. Unit tests sit beside the code as `*.spec.ts` and the e2e test is in `test/`; Vitest runs them (`pnpm test`, `pnpm test:e2e`). Shared schemas and types come from `@helpdesk/shared` (`packages/shared`).
 
+The database is PostgreSQL through Prisma 7 (not one of the `@nestjs/*` database packages listed above). `src/prisma/` holds the global `PrismaModule` and `PrismaService`; inject `PrismaService` to query. The schema is `prisma/schema.prisma`, the config is `prisma7.config.ts`, and the client is generated into `src/generated/prisma/` (import from `../generated/prisma/client.js`).
+
 When a task says how to test, follow it. When it says nothing, cover the behaviour you change with focused tests rather than adding broad e2e suites.

@@ -35,8 +35,11 @@ pnpm lint         # oxlint
 pnpm typecheck
 pnpm test         # Vitest, all packages
 pnpm format       # Prettier
-pnpm db:up        # Postgres in Docker (docker-compose.yml)
-pnpm --filter @helpdesk/api test:e2e
+pnpm db:up        # Postgres in Docker (docker-compose.yml), host port 5433
+pnpm db:migrate   # prisma migrate dev (create + apply a migration)
+pnpm db:generate  # regenerate the Prisma client
+pnpm db:studio    # Prisma Studio
+pnpm --filter @helpdesk/api test:e2e   # needs Postgres running
 ```
 
 Before calling a task done, run `pnpm lint && pnpm typecheck && pnpm test` (and `pnpm build` for config or dependency changes).
@@ -45,13 +48,20 @@ Before calling a task done, run `pnpm lint && pnpm typecheck && pnpm test` (and 
 
 - **TypeScript is pinned to 6.0.x** via the pnpm `catalog` in `pnpm-workspace.yaml`. Do not upgrade to TypeScript 7: it has no JS API, which the NestJS CLI needs.
 - **Shared versions:** dependencies used by several packages go in the `catalog` and are referenced as `"catalog:"`.
-- **pnpm 11 supply-chain settings:** don't add `minimumReleaseAgeExclude` entries or loosen policies to get a just-released version. Widen the version range instead. Packages with install scripts must be approved under `allowBuilds` in `pnpm-workspace.yaml` (Prisma will need this).
+- **pnpm 11 supply-chain settings:** don't add `minimumReleaseAgeExclude` entries or loosen policies to get a just-released version. Widen the version range instead. Packages with install scripts must be approved under `allowBuilds` in `pnpm-workspace.yaml`. Read a package's install script before approving it.
 - **Shared code:** schemas and types used by both apps belong in `packages/shared`, defined with Zod and exported from `src/index.ts`. It is a compiled package (`dist/`), so relative imports inside it end in `.js`.
 - **API (NestJS):**
   - ESM: relative imports end in `.js`, and there is no `__dirname` (use `import.meta.dirname`).
   - Code is organized as feature modules (`src/<feature>/<feature>.module.ts`), and all routes live under the global `/api` prefix.
   - Validate requests with Zod schemas from `@helpdesk/shared` via NestJS's built-in `StandardSchemaValidationPipe`; don't use `class-validator` or `nestjs-zod`.
   - Environment variables are validated in `src/config/env.ts`. Add every new variable there and to `.env.example`.
+- **Database (Prisma 7, PostgreSQL):**
+  - Use the stable Prisma 7.x line. npm's `latest` tag for the `prisma` CLI points at an 8.0 release candidate, so always install with an explicit `@^7` range.
+  - Schema: `apps/api/prisma/schema.prisma`. Config, including the database URL: `apps/api/prisma7.config.ts`, which loads `.env` via `dotenv`. Prisma 7 does not load `.env` itself.
+  - The client is generated into `apps/api/src/generated/prisma/` (gitignored). Import it from `../generated/prisma/client.js`, never from `@prisma/client`. Turbo runs `db:generate` before `dev`, `build`, `lint`, `typecheck`, and `test`.
+  - Access the database through the global `PrismaService` (`src/prisma/`). It connects with the `@prisma/adapter-pg` driver adapter.
+  - After changing the schema, run `pnpm db:migrate --name <change>`. In Prisma 7, `migrate dev` no longer runs `generate` or seed scripts, so run `pnpm db:generate` yourself if needed. Commit the generated `prisma/migrations/` folder.
+  - Local Postgres listens on host port **5433**; port 5432 is used by another project on this machine.
 - **Web:**
   - Import with the `@/` alias (`@/components/...`).
   - Get server state with TanStack Query and validate API responses with the shared schemas.

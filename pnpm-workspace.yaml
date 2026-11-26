@@ -15,3 +15,10 @@ catalog:
   oxlint: ^1.90.0
   prettier: ^3.10.1
   turbo: ^2.11.13
+
+# Dependencies allowed to run install scripts (pnpm 11 blocks unreviewed ones).
+allowBuilds:
+  # Downloads the Prisma schema engine used by `prisma migrate`.
+  '@prisma/engines': true
+  # Preinstall checks Node/TypeScript compatibility.
+  prisma: true
