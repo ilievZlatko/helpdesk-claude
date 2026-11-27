@@ -21,9 +21,12 @@ import { UsersModule } from './users/users.module.js';
         config: ConfigService<Env, true>,
       ) => ({
         auth: createAuth(prisma, {
+          NODE_ENV: config.get('NODE_ENV', { infer: true }),
           BETTER_AUTH_SECRET: config.get('BETTER_AUTH_SECRET', { infer: true }),
           BETTER_AUTH_URL: config.get('BETTER_AUTH_URL', { infer: true }),
           WEB_ORIGIN: config.get('WEB_ORIGIN', { infer: true }),
+          CLIENT_IP_HEADER: config.get('CLIENT_IP_HEADER', { infer: true }),
+          TRUSTED_PROXIES: config.get('TRUSTED_PROXIES', { infer: true }),
         }),
       }),
     }),

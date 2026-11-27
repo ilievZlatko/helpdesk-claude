@@ -46,6 +46,7 @@ Open http://localhost:5173. The web dev server proxies `/api/*` to the API, so t
 
 - **The admin** (`ADMIN_EMAIL` / `ADMIN_PASSWORD`) is always ensured: the seed creates it if it is missing, or gives the existing user the admin role. In production, run the seed with your own admin values.
 - **The agents** are seeded only when `SEED_USER_PASSWORD` is set. Leave it unset in production.
+- **Production is checked at startup** (`apps/api/src/config/env.ts`): with `NODE_ENV=production` the API and the seed refuse to run if `SEED_USER_PASSWORD` is set, if `ADMIN_EMAIL` is an `@example.com` address, if `ADMIN_PASSWORD` is a published default or shorter than 16 characters, or if neither `CLIENT_IP_HEADER` nor `TRUSTED_PROXIES` is set. An `https` `BETTER_AUTH_URL` requires `NODE_ENV=production`.
 - **Existing users keep their password:** seeding never resets it. To change it, update the variable, delete the user, and seed again.
 
 ## Scripts

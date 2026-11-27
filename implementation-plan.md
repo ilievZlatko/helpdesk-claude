@@ -45,7 +45,7 @@ These are working assumptions, not final decisions. They can be revisited withou
 - [x] 1.6a Disable public sign-up (`emailAndPassword.disableSignUp`); dev users come from `pnpm db:seed`
 - [x] 1.6b Seed the admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (created if missing, promoted to admin if it exists; password never reset)
 - [ ] 1.7 Add `isActive` and block sign-in for inactive users
-- [ ] 1.8 Review better-auth rate limiting for sign-in (on by default in production; consider database storage)
+- [x] 1.8 Review better-auth rate limiting for sign-in (on by default in production; consider database storage): enabled explicitly outside tests, stored in Postgres (`rate_limit`), client IP from `CLIENT_IP_HEADER` / `TRUSTED_PROXIES` (required in production)
 - [ ] 1.9 Clean up expired sessions (scheduled job, or confirm better-auth's own cleanup is enough)
 - [x] 1.10 Login page in `web` (React Hook Form + shared Zod schema)
 - [x] 1.11 Auth state in `web` (better-auth React client, `useSession`), protected routes, logout button

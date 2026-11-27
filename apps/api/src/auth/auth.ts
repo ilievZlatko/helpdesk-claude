@@ -8,13 +8,23 @@ import type { PrismaClient } from '../generated/prisma/client.js';
 
 export type AuthEnv = Pick<
   Env,
-  'BETTER_AUTH_SECRET' | 'BETTER_AUTH_URL' | 'WEB_ORIGIN'
+  | 'NODE_ENV'
+  | 'BETTER_AUTH_SECRET'
+  | 'BETTER_AUTH_URL'
+  | 'WEB_ORIGIN'
+  | 'CLIENT_IP_HEADER'
+  | 'TRUSTED_PROXIES'
 >;
 
 /**
  * Builds the better-auth instance. Sessions are stored in Postgres (the
  * `session` table) and checked on every request: there is no secondary
  * storage and no cookie cache.
+ *
+ * Rate limiting (incl. 3 sign-in attempts per 10 s per client IP) is on
+ * everywhere except automated tests, stored in Postgres (`rate_limit`) so it
+ * holds across API instances and restarts. The client IP comes from
+ * CLIENT_IP_HEADER or, behind TRUSTED_PROXIES, from X-Forwarded-For.
  *
  * Used by AuthModule (app.module.ts) and by the seed script.
  */
@@ -30,6 +40,22 @@ export function createAuth(prisma: PrismaClient, env: AuthEnv) {
       // Internal tool: no self-service sign-up. Users come from the seed
       // script; the admin creates the rest.
       disableSignUp: true,
+    },
+    rateLimit: {
+      // Explicit: better-auth only enables it when process.env.NODE_ENV is
+      // "production", so a missing NODE_ENV would silently turn it off. Off
+      // in tests, which sign in many times from one address.
+      enabled: env.NODE_ENV !== 'test',
+      storage: 'database',
+    },
+    advanced: {
+      ipAddress: {
+        // Default: X-Forwarded-For (a single value is trusted as the client).
+        ipAddressHeaders: env.CLIENT_IP_HEADER
+          ? [env.CLIENT_IP_HEADER]
+          : undefined,
+        trustedProxies: env.TRUSTED_PROXIES,
+      },
     },
     plugins: [
       // Roles (user.role: admin | agent) plus admin-only endpoints under

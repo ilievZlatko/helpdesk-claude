@@ -9,7 +9,7 @@
     "dev": "nest start --watch --preserveWatchOutput",
     "start": "nest start",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "NODE_ENV=production node dist/main",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --type-aware src/ test/ prisma/",
     "test": "vitest run",
