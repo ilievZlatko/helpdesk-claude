@@ -38,6 +38,7 @@ pnpm format       # Prettier
 pnpm db:up        # Postgres in Docker (docker-compose.yml), host port 5433
 pnpm db:migrate   # prisma migrate dev (create + apply a migration)
 pnpm db:generate  # regenerate the Prisma client
+pnpm db:seed      # create dev users (idempotent; password from SEED_USER_PASSWORD)
 pnpm db:studio    # Prisma Studio
 pnpm --filter @helpdesk/api test:e2e   # needs Postgres running
 ```

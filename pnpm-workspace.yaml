@@ -20,5 +20,8 @@ catalog:
 allowBuilds:
   # Downloads the Prisma schema engine used by `prisma migrate`.
   '@prisma/engines': true
+  # Not needed: its postinstall only verifies or downloads the platform binary,
+  # which pnpm already installs as an optional dependency (used by tsx).
+  esbuild: false
   # Preinstall checks Node/TypeScript compatibility.
   prisma: true
