@@ -1,5 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { admin } from 'better-auth/plugins/admin';
+import { adminAc, userAc } from 'better-auth/plugins/admin/access';
 import type { Env } from '../config/env.js';
 import type { PrismaClient } from '../generated/prisma/client.js';
 
@@ -22,7 +24,21 @@ export function createAuth(prisma: PrismaClient, env: AuthEnv) {
     baseURL: env.BETTER_AUTH_URL,
     basePath: '/api/auth',
     trustedOrigins: [env.WEB_ORIGIN],
-    emailAndPassword: { enabled: true },
+    emailAndPassword: {
+      enabled: true,
+      // Internal tool: no self-service sign-up. Users come from the seed
+      // script; the admin creates the rest.
+      disableSignUp: true,
+    },
+    plugins: [
+      // Roles (user.role: admin | agent) plus admin-only endpoints under
+      // /api/auth/admin/* (create/list users, ban, revoke sessions, set role).
+      admin({
+        defaultRole: 'agent',
+        adminRoles: ['admin'],
+        roles: { admin: adminAc, agent: userAc },
+      }),
+    ],
   });
 }
 

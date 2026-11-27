@@ -6,6 +6,7 @@ import { validateEnv, type Env } from './config/env.js';
 import { HealthModule } from './health/health.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { PrismaService } from './prisma/prisma.service.js';
+import { UsersModule } from './users/users.module.js';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PrismaService } from './prisma/prisma.service.js';
       }),
     }),
     HealthModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
