@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import { useRedirectAfterLogin } from '@/lib/login-redirect';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -67,6 +68,7 @@ export function LoginPage() {
   return (
     <main className="relative isolate flex min-h-svh flex-col items-center justify-center gap-8 overflow-hidden p-6">
       <LoginBackground />
+      <ThemeToggle className="absolute top-4 right-4 hover:bg-white/40 dark:hover:bg-white/10" />
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/30">
           <LifeBuoy className="size-6" aria-hidden />
@@ -78,7 +80,7 @@ export function LoginPage() {
           </p>
         </div>
       </div>
-      <Card className="w-full max-w-sm border-white/70 bg-white/45 shadow-2xl shadow-indigo-950/25 ring-1 ring-white/40 ring-inset backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/40">
+      <Card className="w-full max-w-sm border-white/70 bg-white/45 shadow-2xl shadow-indigo-950/25 ring-1 ring-white/40 ring-inset backdrop-blur-2xl backdrop-saturate-150 dark:border-white/15 dark:bg-slate-900/40 dark:ring-white/5">
         <CardHeader>
           <CardTitle className="text-lg">Welcome back</CardTitle>
           <CardDescription>

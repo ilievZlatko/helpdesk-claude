@@ -36,7 +36,7 @@ export function HomePage() {
               <span className="font-medium text-destructive">unreachable</span>
             )}
             {health.isSuccess && (
-              <span className="font-medium text-green-600">
+              <span className="font-medium text-green-600 dark:text-green-400">
                 {health.data.status}
               </span>
             )}

@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { LifeBuoy, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 
@@ -35,6 +36,7 @@ export function AppLayout() {
             Helpdesk
           </Link>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <span className="text-sm font-medium">{session?.user.name}</span>
             <Button
               variant="outline"
