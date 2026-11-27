@@ -69,6 +69,7 @@ Before calling a task done, run `pnpm lint && pnpm typecheck && pnpm test` (and 
   - Get server state with TanStack Query and validate API responses with the shared schemas.
   - Add UI components from `apps/web` with `pnpm dlx shadcn@latest add <component>`; components in `src/components/ui` are generated and can be edited.
   - In dev, the Vite server proxies `/api` to the API, so use relative `/api/...` URLs.
+  - Auth uses the better-auth React client (`src/lib/auth-client.ts`): `authClient.useSession()`, `signIn.email()`, `signOut()`. Routes are declared in `src/App.tsx` with React Router; pages that need a session go under `<RequireAuth />` (inside `AppLayout`), the login page under `<RequireGuest />`.
 - **Tests:** Vitest everywhere (`vi.fn()`, not `jest.fn()`). Unit tests sit next to the code (`*.spec.ts` in api, `*.test.ts(x)` in web/shared). Cover changed behavior with focused tests.
 - **Formatting:** Prettier with single quotes and trailing commas. Run `pnpm format` before finishing.
 

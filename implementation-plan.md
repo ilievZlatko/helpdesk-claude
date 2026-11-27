@@ -47,9 +47,9 @@ These are working assumptions, not final decisions. They can be revisited withou
 - [ ] 1.7 Add `isActive` and block sign-in for inactive users
 - [ ] 1.8 Review better-auth rate limiting for sign-in (on by default in production; consider database storage)
 - [ ] 1.9 Clean up expired sessions (scheduled job, or confirm better-auth's own cleanup is enough)
-- [ ] 1.10 Login page in `web` (React Hook Form + shared Zod schema)
-- [ ] 1.11 Auth state in `web` (better-auth React client, `useSession`), protected routes, logout button
-- [ ] 1.12 App shell layout: sidebar navigation, header with current user
+- [x] 1.10 Login page in `web` (React Hook Form + shared Zod schema)
+- [x] 1.11 Auth state in `web` (better-auth React client, `useSession`), protected routes, logout button
+- [ ] 1.12 App shell layout: sidebar navigation, header with current user (header with name and sign-out: done in `AppLayout`)
 - [x] 1.13 Tests: sign-up disabled, sign-in success/failure, sign-out, global guard (`test/auth.e2e-spec.ts`)
 - [ ] 1.14 Tests: expired session (role guard: done in `test/auth.e2e-spec.ts`)
 
