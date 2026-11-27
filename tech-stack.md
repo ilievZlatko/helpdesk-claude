@@ -7,7 +7,7 @@ TypeScript end to end, organized as a monorepo so the API and UI can share types
 | Layer                      | Choice                                                                               |
 | -------------------------- | ------------------------------------------------------------------------------------ |
 | Monorepo                   | pnpm workspaces + Turborepo                                                          |
-| Frontend                   | React + Vite, Tailwind CSS, shadcn/ui, React Router                                  |
+| Frontend                   | React + Vite, Tailwind CSS, shadcn/ui, React Router, Phosphor icons                  |
 | Data fetching / tables     | TanStack Query, TanStack Table                                                       |
 | Forms                      | React Hook Form + Zod                                                                |
 | Backend                    | NestJS                                                                               |

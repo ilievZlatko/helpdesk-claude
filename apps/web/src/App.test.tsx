@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import App from './App';
@@ -88,9 +88,11 @@ describe('login', () => {
     await user.type(screen.getByLabelText('Password'), 'secret');
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    const nav = await screen.findByRole('navigation');
     expect(
-      within(nav).getByRole('button', { name: 'Open user menu' }),
+      await screen.findByRole('navigation', { name: 'Main' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Open user menu' }),
     ).toHaveTextContent('MT');
     expect(
       screen.getByRole('heading', { name: 'Welcome, Maya Thompson' }),
@@ -154,7 +156,7 @@ describe('home page', () => {
   });
 });
 
-describe('settings page', () => {
+describe('account page', () => {
   beforeEach(() => {
     auth.session = maya;
   });
@@ -165,13 +167,35 @@ describe('settings page', () => {
     renderApp('/');
 
     await user.click(screen.getByRole('button', { name: 'Open user menu' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Account' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Account' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('maya.thompson@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Agent')).toBeInTheDocument();
+  });
+});
+
+describe('settings page', () => {
+  beforeEach(() => {
+    auth.session = maya;
+  });
+
+  it('opens from the user menu and shows Appearance', async () => {
+    mockHealthOk();
+    const user = userEvent.setup();
+    renderApp('/');
+
+    await user.click(screen.getByRole('button', { name: 'Open user menu' }));
     await user.click(await screen.findByRole('menuitem', { name: 'Settings' }));
 
     expect(
       await screen.findByRole('heading', { name: 'Settings' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('maya.thompson@example.com')).toBeInTheDocument();
-    expect(screen.getByText('Agent')).toBeInTheDocument();
+    expect(
+      screen.getByRole('radiogroup', { name: 'Theme' }),
+    ).toBeInTheDocument();
   });
 
   it('changes the theme from the Appearance section', async () => {
@@ -185,5 +209,35 @@ describe('settings page', () => {
 
     expect(dark).toHaveAttribute('aria-checked', 'true');
     expect(document.documentElement).toHaveClass('dark');
+  });
+});
+
+describe('users page', () => {
+  it('shows the page to admins', async () => {
+    auth.session = { user: { ...maya.user, role: 'admin' } };
+    renderApp('/users');
+
+    expect(
+      await screen.findByRole('heading', { name: 'Users' }),
+    ).toBeInTheDocument();
+  });
+
+  it('sends agents home', async () => {
+    mockHealthOk();
+    auth.session = maya;
+    renderApp('/users');
+
+    expect(
+      await screen.findByRole('heading', { name: 'Welcome, Maya Thompson' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Users' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('sends signed-out visitors to the login page', () => {
+    renderApp('/users');
+
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
   });
 });

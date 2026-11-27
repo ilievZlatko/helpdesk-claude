@@ -1,3 +1,4 @@
+import type { UserRole } from '@helpdesk/shared';
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { authClient } from '@/modules/auth/auth-client';
 import {
@@ -33,5 +34,20 @@ export function RequireGuest() {
 
   if (isPending) return <FullPageMessage>Loading…</FullPageMessage>;
   if (session) return <Navigate to={redirectTo} replace />;
+  return <Outlet />;
+}
+
+/**
+ * Renders the child routes only for users with one of `roles`; sends anyone
+ * else home. Use inside <RequireAuth />. This only hides UI: the API enforces
+ * roles itself (`@Roles([...])`).
+ */
+export function RequireRole({ roles }: { roles: UserRole[] }) {
+  const { data: session } = authClient.useSession();
+  const role = session?.user.role;
+
+  if (!role || !roles.some((allowed) => allowed === role)) {
+    return <Navigate to="/" replace />;
+  }
   return <Outlet />;
 }

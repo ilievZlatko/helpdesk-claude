@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signInSchema, type SignInInput } from '@helpdesk/shared';
-import { AlertCircle } from 'lucide-react';
+import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -92,7 +92,7 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
           <FieldGroup>
             {errors.root && (
               <Alert variant="destructive">
-                <AlertCircle aria-hidden />
+                <WarningCircleIcon aria-hidden />
                 <AlertDescription>{errors.root.message}</AlertDescription>
               </Alert>
             )}

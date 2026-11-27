@@ -2,10 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
-import { ThemeProvider } from '@/modules/theme/theme-provider';
 import { UserMenu } from '../user-menu';
 
-const auth = vi.hoisted(() => ({ signOut: vi.fn() }));
+const auth = vi.hoisted(() => ({ signOut: vi.fn(), role: 'admin' }));
 
 vi.mock('@/modules/auth/auth-client', () => ({
   authClient: {
@@ -14,7 +13,7 @@ vi.mock('@/modules/auth/auth-client', () => ({
         user: {
           name: 'Maya Thompson',
           email: 'maya.thompson@example.com',
-          role: 'admin',
+          role: auth.role,
           image: null,
         },
       },
@@ -25,6 +24,7 @@ vi.mock('@/modules/auth/auth-client', () => ({
 }));
 
 beforeEach(() => {
+  auth.role = 'admin';
   auth.signOut.mockReset().mockResolvedValue({ data: { success: true } });
 });
 
@@ -32,17 +32,16 @@ function renderMenu() {
   const queryClient = new QueryClient();
   const clear = vi.spyOn(queryClient, 'clear');
   render(
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/']}>
-          <Routes>
-            <Route path="/" element={<UserMenu />} />
-            <Route path="/settings" element={<p>Settings page</p>} />
-            <Route path="/login" element={<p>Login page</p>} />
-          </Routes>
-        </MemoryRouter>
-      </QueryClientProvider>
-    </ThemeProvider>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<UserMenu />} />
+          <Route path="/account" element={<p>Account page</p>} />
+          <Route path="/settings" element={<p>Settings page</p>} />
+          <Route path="/login" element={<p>Login page</p>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
   return { user: userEvent.setup(), clear };
 }
@@ -61,7 +60,7 @@ describe('UserMenu', () => {
     ).toHaveTextContent('MT');
   });
 
-  it('shows who is signed in as a static header, not a menu item', async () => {
+  it('shows who is signed in as a static header, then Account, Settings and Sign out', async () => {
     const { user } = renderMenu();
     await openMenu(user);
 
@@ -71,9 +70,19 @@ describe('UserMenu', () => {
     expect(
       screen.queryByRole('menuitem', { name: /Maya Thompson/ }),
     ).not.toBeInTheDocument();
+    // No Users (lives in the sidebar) and no Theme (lives in the header).
     expect(
       screen.getAllByRole('menuitem').map((item) => item.textContent),
-    ).toEqual(['Settings', 'Theme', 'Sign out']);
+    ).toEqual(['Account', 'Settings', 'Sign out']);
+  });
+
+  it('goes to the account page', async () => {
+    const { user } = renderMenu();
+    await openMenu(user);
+
+    await user.click(screen.getByRole('menuitem', { name: 'Account' }));
+
+    expect(await screen.findByText('Account page')).toBeInTheDocument();
   });
 
   it('goes to the settings page', async () => {
@@ -83,19 +92,6 @@ describe('UserMenu', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Settings' }));
 
     expect(await screen.findByText('Settings page')).toBeInTheDocument();
-  });
-
-  it('switches the theme from the Theme submenu', async () => {
-    const { user } = renderMenu();
-    await openMenu(user);
-
-    screen.getByRole('menuitem', { name: 'Theme' }).focus();
-    await user.keyboard('{ArrowRight}');
-    await user.click(
-      await screen.findByRole('menuitemradio', { name: 'Dark' }),
-    );
-
-    expect(document.documentElement).toHaveClass('dark');
   });
 
   it('signs out, clears cached data, and goes to the login page', async () => {

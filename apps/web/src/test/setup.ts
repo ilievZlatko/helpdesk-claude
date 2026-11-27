@@ -26,6 +26,16 @@ Object.defineProperty(window, 'matchMedia', {
     }) as MediaQueryList,
 });
 
+/**
+ * jsdom has no ResizeObserver; Radix (tooltips, popovers) uses it to measure
+ * content. A no-op is enough for tests.
+ */
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
