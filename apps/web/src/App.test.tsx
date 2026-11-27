@@ -5,7 +5,9 @@ import { MemoryRouter } from 'react-router';
 import App from './App';
 import { ThemeProvider } from '@/modules/theme/theme-provider';
 
-type FakeSession = { user: { name: string } };
+type FakeSession = {
+  user: { name: string; email: string; role: string; image: string | null };
+};
 
 // Stand-in for better-auth's client. `useSession` reads `auth.session`, so a
 // test changes who is signed in by setting it; navigation re-renders pick it up.
@@ -27,7 +29,14 @@ vi.mock('@/modules/auth/auth-client', () => ({
   },
 }));
 
-const maya: FakeSession = { user: { name: 'Maya Thompson' } };
+const maya: FakeSession = {
+  user: {
+    name: 'Maya Thompson',
+    email: 'maya.thompson@example.com',
+    role: 'agent',
+    image: null,
+  },
+};
 
 function renderApp(path = '/') {
   const queryClient = new QueryClient({
@@ -80,10 +89,9 @@ describe('login', () => {
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
     const nav = await screen.findByRole('navigation');
-    expect(within(nav).getByText('Maya Thompson')).toBeInTheDocument();
     expect(
-      within(nav).getByRole('button', { name: 'Sign out' }),
-    ).toBeInTheDocument();
+      within(nav).getByRole('button', { name: 'Open user menu' }),
+    ).toHaveTextContent('MT');
     expect(
       screen.getByRole('heading', { name: 'Welcome, Maya Thompson' }),
     ).toBeInTheDocument();
@@ -115,7 +123,8 @@ describe('sign out', () => {
     const user = userEvent.setup();
     renderApp('/');
 
-    await user.click(screen.getByRole('button', { name: 'Sign out' }));
+    await user.click(screen.getByRole('button', { name: 'Open user menu' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Sign out' }));
 
     expect(auth.signOut).toHaveBeenCalledOnce();
     expect(await screen.findByLabelText('Email')).toBeInTheDocument();
@@ -142,5 +151,39 @@ describe('home page', () => {
     renderApp('/');
 
     expect(await screen.findByText('unreachable')).toBeInTheDocument();
+  });
+});
+
+describe('settings page', () => {
+  beforeEach(() => {
+    auth.session = maya;
+  });
+
+  it('opens from the user menu and shows the profile', async () => {
+    mockHealthOk();
+    const user = userEvent.setup();
+    renderApp('/');
+
+    await user.click(screen.getByRole('button', { name: 'Open user menu' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Settings' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Settings' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('maya.thompson@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Agent')).toBeInTheDocument();
+  });
+
+  it('changes the theme from the Appearance section', async () => {
+    const user = userEvent.setup();
+    renderApp('/settings');
+
+    const dark = screen.getByRole('radio', { name: 'Dark' });
+    expect(dark).toHaveAttribute('aria-checked', 'false');
+
+    await user.click(dark);
+
+    expect(dark).toHaveAttribute('aria-checked', 'true');
+    expect(document.documentElement).toHaveClass('dark');
   });
 });
