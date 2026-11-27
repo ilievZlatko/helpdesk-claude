@@ -6,5 +6,7 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.e2e-spec.ts'],
+    // Seeds the dev users once per run (idempotent).
+    globalSetup: ['./test/global-setup.ts'],
   },
 });

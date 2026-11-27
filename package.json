@@ -18,6 +18,7 @@
     "db:down": "docker compose down",
     "db:generate": "pnpm --filter @helpdesk/api db:generate",
     "db:migrate": "pnpm --filter @helpdesk/api db:migrate",
+    "db:seed": "pnpm --filter @helpdesk/api db:seed",
     "db:studio": "pnpm --filter @helpdesk/api db:studio"
   },
   "devDependencies": {

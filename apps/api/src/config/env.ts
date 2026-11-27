@@ -9,6 +9,8 @@ export const envSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.url(),
   WEB_ORIGIN: z.url().default('http://localhost:5173'),
+  // Only used by the seed script (prisma/seed.ts).
+  SEED_USER_PASSWORD: z.string().min(8).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

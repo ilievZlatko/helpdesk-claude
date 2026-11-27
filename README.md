@@ -24,10 +24,26 @@ packages/
 pnpm install
 cp apps/api/.env.example apps/api/.env
 pnpm db:up        # start Postgres in Docker (host port 5433)
+pnpm db:migrate   # apply migrations
+pnpm db:seed      # create the dev users (see below)
 pnpm dev          # start shared (watch), api, and web
 ```
 
 Open http://localhost:5173. The web dev server proxies `/api/*` to the API, so the browser sees a single origin.
+
+## Dev users
+
+`pnpm db:seed` creates these users. The API e2e tests also seed them before they run. They all share the password from `SEED_USER_PASSWORD` in `apps/api/.env`, which defaults to **`helpdesk-dev-password`** (from `.env.example`). They are dev/test accounts only, so never seed them in production.
+
+| Name          | Email                     |
+| ------------- | ------------------------- |
+| Maya Thompson | maya.thompson@example.com |
+| Daniel Okafor | daniel.okafor@example.com |
+| Sofia Ramirez | sofia.ramirez@example.com |
+| Liam Chen     | liam.chen@example.com     |
+| Priya Nair    | priya.nair@example.com    |
+
+Seeding skips users that already exist and does not reset their password. To change the password, update `SEED_USER_PASSWORD`, delete the users, and seed again.
 
 ## Scripts
 
@@ -44,6 +60,7 @@ All scripts run across the workspace through Turborepo:
 | `pnpm db:up / down` | Start / stop Postgres                 |
 | `pnpm db:migrate`   | Create and apply a migration (Prisma) |
 | `pnpm db:generate`  | Regenerate the Prisma client          |
+| `pnpm db:seed`      | Create the dev users (idempotent)     |
 | `pnpm db:studio`    | Open Prisma Studio                    |
 
 Run a script in one package with `--filter`, e.g. `pnpm --filter @helpdesk/api test:e2e`.

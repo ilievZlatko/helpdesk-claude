@@ -19,7 +19,11 @@ import { PrismaService } from './prisma/prisma.service.js';
         prisma: PrismaService,
         config: ConfigService<Env, true>,
       ) => ({
-        auth: createAuth(prisma, config),
+        auth: createAuth(prisma, {
+          BETTER_AUTH_SECRET: config.get('BETTER_AUTH_SECRET', { infer: true }),
+          BETTER_AUTH_URL: config.get('BETTER_AUTH_URL', { infer: true }),
+          WEB_ORIGIN: config.get('WEB_ORIGIN', { infer: true }),
+        }),
       }),
     }),
     HealthModule,

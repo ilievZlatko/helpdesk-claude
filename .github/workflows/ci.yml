@@ -16,6 +16,8 @@ jobs:
       TURBO_TELEMETRY_DISABLED: 1
       DATABASE_URL: postgresql://helpdesk:helpdesk@localhost:5432/helpdesk
       BETTER_AUTH_URL: http://localhost:3000
+      # Dev/test-only password for the seed users (see apps/api/.env.example).
+      SEED_USER_PASSWORD: helpdesk-dev-password
     services:
       postgres:
         image: postgres:18-alpine
