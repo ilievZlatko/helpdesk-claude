@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { Roles, Session, type UserSession } from '@thallesp/nestjs-better-auth';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
+import { UserRole } from '@helpdesk/shared';
 import { inject } from 'vitest';
 import { AppModule } from './../src/app.module.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
@@ -16,7 +17,7 @@ class ProtectedController {
   }
 
   @Get('admin')
-  @Roles(['admin'])
+  @Roles([UserRole.Admin])
   adminOnly() {
     return { ok: true };
   }
@@ -143,16 +144,16 @@ describe('Auth (e2e)', () => {
         .get('/api/auth/get-session')
         .set('Cookie', admin)
         .expect(200);
-      expect(adminSession.body.user.role).toBe('admin');
+      expect(adminSession.body.user.role).toBe(UserRole.Admin);
 
       const agentSession = await request(app.getHttpServer())
         .get('/api/auth/get-session')
         .set('Cookie', agent)
         .expect(200);
-      expect(agentSession.body.user.role).toBe('agent');
+      expect(agentSession.body.user.role).toBe(UserRole.Agent);
     });
 
-    it('lets only admins reach @Roles(["admin"]) routes and admin endpoints', async () => {
+    it('lets only admins reach @Roles([UserRole.Admin]) routes and admin endpoints', async () => {
       const admin = sessionCookie(
         await signIn(adminUser.password, adminUser.email).expect(200),
       );

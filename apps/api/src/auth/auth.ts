@@ -1,3 +1,4 @@
+import { UserRole } from '@helpdesk/shared';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { admin } from 'better-auth/plugins/admin';
@@ -34,9 +35,9 @@ export function createAuth(prisma: PrismaClient, env: AuthEnv) {
       // Roles (user.role: admin | agent) plus admin-only endpoints under
       // /api/auth/admin/* (create/list users, ban, revoke sessions, set role).
       admin({
-        defaultRole: 'agent',
-        adminRoles: ['admin'],
-        roles: { admin: adminAc, agent: userAc },
+        defaultRole: UserRole.Agent,
+        adminRoles: [UserRole.Admin],
+        roles: { [UserRole.Admin]: adminAc, [UserRole.Agent]: userAc },
       }),
     ],
   });

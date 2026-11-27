@@ -1,10 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import { UserRole } from '@helpdesk/shared';
 import { createAuth, type AuthEnv } from '../src/auth/auth.js';
-import {
-  Prisma,
-  type PrismaClient,
-  type UserRole,
-} from '../src/generated/prisma/client.js';
+import { Prisma, type PrismaClient } from '../src/generated/prisma/client.js';
 
 /** Dev/test agents. All share SEED_USER_PASSWORD (see .env.example). */
 export const SEED_USERS = [
@@ -95,15 +92,15 @@ export async function ensureAdmin(
     const created = await createCredentialUser(
       prisma,
       env,
-      { name: ADMIN_NAME, email, role: 'admin' },
+      { name: ADMIN_NAME, email, role: UserRole.Admin },
       await hashPassword(prisma, env, password),
     );
     if (created) return 'created';
   }
   // Exists (or a concurrent run just created it): make sure it is an admin.
   const { count } = await prisma.user.updateMany({
-    where: { email, role: { not: 'admin' } },
-    data: { role: 'admin' },
+    where: { email, role: { not: UserRole.Admin } },
+    data: { role: UserRole.Admin },
   });
   return count > 0 ? 'promoted' : 'exists';
 }
@@ -137,7 +134,7 @@ export async function seedUsers(
     const ok = await createCredentialUser(
       prisma,
       env,
-      { name, email, role: 'agent' },
+      { name, email, role: UserRole.Agent },
       hash,
     );
     (ok ? created : existing).push(email);

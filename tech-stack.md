@@ -69,9 +69,10 @@ NestJS integrates with Prisma through a `PrismaService` provided via a global `P
 ### Roles
 
 - Roles come from better-auth's **admin plugin**. `user.role` is a Postgres enum, `admin | agent`, and defaults to `agent`.
+- In code, use the `UserRole` enum from `@helpdesk/shared` (`UserRole.Admin`, `UserRole.Agent`; schema: `userRoleSchema`). It is a const object, so its values are the plain strings the database stores. A test in `apps/api` checks that it matches the Prisma enum.
 - **Admin:** guaranteed by the seed from `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Admins can use the plugin's endpoints under `/api/auth/admin/*`: create, list and ban users, revoke sessions, and set roles.
 - **Agent:** works on tickets and has no admin permissions.
-- Admin-only Nest routes use `@Roles(['admin'])` from `@thallesp/nestjs-better-auth`.
+- Admin-only Nest routes use `@Roles([UserRole.Admin])` from `@thallesp/nestjs-better-auth`.
 
 ## Email
 

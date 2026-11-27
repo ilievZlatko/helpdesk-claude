@@ -1,6 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { currentUserSchema } from '@helpdesk/shared';
+import { UserRole, currentUserSchema } from '@helpdesk/shared';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { inject } from 'vitest';
@@ -63,7 +63,7 @@ describe('Users (e2e)', () => {
       expect(me).toMatchObject({
         name: agent.name,
         email: agent.email,
-        role: 'agent',
+        role: UserRole.Agent,
       });
       // Only the public fields are returned.
       expect(Object.keys(res.body).sort()).toEqual(
@@ -79,7 +79,7 @@ describe('Users (e2e)', () => {
 
       expect(currentUserSchema.parse(res.body)).toMatchObject({
         email: admin.email,
-        role: 'admin',
+        role: UserRole.Admin,
       });
     });
   });

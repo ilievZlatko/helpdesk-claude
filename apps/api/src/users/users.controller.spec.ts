@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { currentUserSchema } from '@helpdesk/shared';
+import { UserRole, currentUserSchema } from '@helpdesk/shared';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import type { Auth } from '../auth/auth.js';
 import { UsersController } from './users.controller.js';
@@ -15,7 +15,7 @@ describe('UsersController', () => {
         email: 'maya.thompson@example.com',
         emailVerified: true,
         image: undefined,
-        role: 'agent',
+        role: UserRole.Agent,
         banned: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -38,14 +38,16 @@ describe('UsersController', () => {
       id: 'u_123',
       name: 'Maya Thompson',
       email: 'maya.thompson@example.com',
-      role: 'agent',
+      role: UserRole.Agent,
       image: null,
     });
     expect(currentUserSchema.safeParse(me).success).toBe(true);
   });
 
   it('returns the admin role for admins', () => {
-    expect(controller.me(session({ role: 'admin' })).role).toBe('admin');
+    expect(controller.me(session({ role: UserRole.Admin })).role).toBe(
+      UserRole.Admin,
+    );
   });
 
   it('fails loudly on a role outside admin | agent', () => {

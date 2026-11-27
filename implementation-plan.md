@@ -41,7 +41,7 @@ These are working assumptions, not final decisions. They can be revisited withou
 - [x] 1.3 Add the better-auth models (`User`, `Session`, `Account`, `Verification`) and create the first migration
 - [x] 1.4 Wire `@thallesp/nestjs-better-auth`: routes under `/api/auth/*` and a global `AuthGuard`, with `@AllowAnonymous()` for public routes such as `/api/health`
 - [x] 1.4a `GET /api/users/me`: the current user (`id`, `name`, `email`, `role`, `image`; shared `currentUserSchema`)
-- [x] 1.5 Add roles (`admin | agent`) via better-auth's admin plugin (`role` enum, default `agent`); admin routes use `@Roles(['admin'])`
+- [x] 1.5 Add roles (`admin | agent`) via better-auth's admin plugin (`role` enum, default `agent`); admin routes use `@Roles([UserRole.Admin])`
 - [x] 1.6a Disable public sign-up (`emailAndPassword.disableSignUp`); dev users come from `pnpm db:seed`
 - [x] 1.6b Seed the admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (created if missing, promoted to admin if it exists; password never reset)
 - [ ] 1.7 Add `isActive` and block sign-in for inactive users
