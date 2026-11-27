@@ -29,4 +29,6 @@ In this project, `src/main.ts` creates the app, sets the global `api` prefix, an
 
 The database is PostgreSQL through Prisma 7 (not one of the `@nestjs/*` database packages listed above). `src/prisma/` holds the global `PrismaModule` and `PrismaService`; inject `PrismaService` to query. The schema is `prisma/schema.prisma`, the config is `prisma7.config.ts`, and the client is generated into `src/generated/prisma/` (import from `../generated/prisma/client.js`).
 
+Authentication uses better-auth (`src/auth/auth.ts`, database sessions in Postgres) through `@thallesp/nestjs-better-auth`, which registers a global `AuthGuard`. Mark public routes `@AllowAnonymous()`. Create the app with `{ bodyParser: false }`, including in e2e tests.
+
 When a task says how to test, follow it. When it says nothing, cover the behaviour you change with focused tests rather than adding broad e2e suites.

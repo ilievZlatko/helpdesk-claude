@@ -55,6 +55,7 @@ Before calling a task done, run `pnpm lint && pnpm typecheck && pnpm test` (and 
   - Code is organized as feature modules (`src/<feature>/<feature>.module.ts`), and all routes live under the global `/api` prefix.
   - Validate requests with Zod schemas from `@helpdesk/shared` via NestJS's built-in `StandardSchemaValidationPipe`; don't use `class-validator` or `nestjs-zod`.
   - Environment variables are validated in `src/config/env.ts`. Add every new variable there and to `.env.example`.
+  - Auth is better-auth (`src/auth/auth.ts`) through `@thallesp/nestjs-better-auth`. Every route needs a session by default (global `AuthGuard`); mark public routes with `@AllowAnonymous()` and read the session with `@Session()`. The app is created with `bodyParser: false` (in `main.ts` and in e2e tests). Better-auth's own routes live under `/api/auth/*`.
 - **Database (Prisma 7, PostgreSQL):**
   - Use the stable Prisma 7.x line. npm's `latest` tag for the `prisma` CLI points at an 8.0 release candidate, so always install with an explicit `@^7` range.
   - Schema: `apps/api/prisma/schema.prisma`. Config, including the database URL: `apps/api/prisma7.config.ts`, which loads `.env` via `dotenv`. Prisma 7 does not load `.env` itself.
