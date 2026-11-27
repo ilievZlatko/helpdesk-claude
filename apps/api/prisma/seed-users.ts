@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
+import { UserRole } from '@helpdesk/shared';
 import { createAuth, type AuthEnv } from '../src/auth/auth.js';
 import { Prisma, type PrismaClient } from '../src/generated/prisma/client.js';
 
-/** Dev/test users. All share SEED_USER_PASSWORD (see .env.example). */
+/** Dev/test agents. All share SEED_USER_PASSWORD (see .env.example). */
 export const SEED_USERS = [
   { name: 'Maya Thompson', email: 'maya.thompson@example.com' },
   { name: 'Daniel Okafor', email: 'daniel.okafor@example.com' },
@@ -11,15 +12,103 @@ export const SEED_USERS = [
   { name: 'Priya Nair', email: 'priya.nair@example.com' },
 ] as const;
 
+export const ADMIN_NAME = 'Helpdesk Admin';
+
 export interface SeedResult {
   created: string[];
   existing: string[];
 }
 
+export type AdminSeedResult = 'created' | 'promoted' | 'exists';
+
+interface NewUser {
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
 /**
- * Creates any SEED_USERS that don't exist yet; existing users are left
- * untouched (their password is not reset). Safe to run repeatedly and
- * concurrently:
+ * Creates the user and its credential account in one insert, so a user is
+ * never left without a password. Ids and the password hash are produced the
+ * same way better-auth's own sign-up does. Returns false when the email is
+ * already taken (unique constraint), e.g. because a concurrent run won.
+ */
+async function createCredentialUser(
+  prisma: PrismaClient,
+  env: AuthEnv,
+  user: NewUser,
+  passwordHash: string,
+): Promise<boolean> {
+  const ctx = await createAuth(prisma, env).$context;
+  const newId = (model: 'user' | 'account') =>
+    ctx.generateId({ model }) || randomUUID();
+  const userId = newId('user');
+  try {
+    await prisma.user.create({
+      data: {
+        id: userId,
+        ...user,
+        emailVerified: true,
+        accounts: {
+          create: {
+            id: newId('account'),
+            accountId: userId,
+            providerId: 'credential',
+            password: passwordHash,
+          },
+        },
+      },
+    });
+    return true;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      return false;
+    }
+    throw error;
+  }
+}
+
+async function hashPassword(prisma: PrismaClient, env: AuthEnv, pw: string) {
+  return (await createAuth(prisma, env).$context).password.hash(pw);
+}
+
+/**
+ * Guarantees an admin account with this email: creates it if missing, or
+ * gives an existing user the admin role. Never resets the password.
+ */
+export async function ensureAdmin(
+  prisma: PrismaClient,
+  env: AuthEnv,
+  { email, password }: { email: string; password: string },
+): Promise<AdminSeedResult> {
+  const existing = await prisma.user.findUnique({
+    where: { email },
+    select: { role: true },
+  });
+  if (!existing) {
+    const created = await createCredentialUser(
+      prisma,
+      env,
+      { name: ADMIN_NAME, email, role: UserRole.Admin },
+      await hashPassword(prisma, env, password),
+    );
+    if (created) return 'created';
+  }
+  // Exists (or a concurrent run just created it): make sure it is an admin.
+  const { count } = await prisma.user.updateMany({
+    where: { email, role: { not: UserRole.Admin } },
+    data: { role: UserRole.Admin },
+  });
+  return count > 0 ? 'promoted' : 'exists';
+}
+
+/**
+ * Creates any SEED_USERS (as agents) that don't exist yet; existing users are
+ * left untouched (their password and role are not changed). Safe to run
+ * repeatedly and concurrently:
  * - users already in the database are skipped up front, so a fully seeded
  *   database costs one query and no password hashing;
  * - the unique constraint on `user.email` is the final guard: if another run
@@ -40,44 +129,15 @@ export async function seedUsers(
   const created: string[] = [];
   if (missing.length === 0) return { created, existing };
 
-  // Hash and generate ids the same way better-auth's sign-up does.
-  const ctx = await createAuth(prisma, env).$context;
-  const newId = (model: 'user' | 'account') =>
-    ctx.generateId({ model }) || randomUUID();
-  const hash = await ctx.password.hash(password);
-
+  const hash = await hashPassword(prisma, env, password);
   for (const { name, email } of missing) {
-    const userId = newId('user');
-    try {
-      // One insert for the user and its credential account, so a user is
-      // never left without a password.
-      await prisma.user.create({
-        data: {
-          id: userId,
-          name,
-          email,
-          emailVerified: true,
-          accounts: {
-            create: {
-              id: newId('account'),
-              accountId: userId,
-              providerId: 'credential',
-              password: hash,
-            },
-          },
-        },
-      });
-      created.push(email);
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        existing.push(email);
-        continue;
-      }
-      throw error;
-    }
+    const ok = await createCredentialUser(
+      prisma,
+      env,
+      { name, email, role: UserRole.Agent },
+      hash,
+    );
+    (ok ? created : existing).push(email);
   }
   return { created, existing };
 }

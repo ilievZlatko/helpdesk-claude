@@ -33,17 +33,20 @@ Open http://localhost:5173. The web dev server proxies `/api/*` to the API, so t
 
 ## Dev users
 
-`pnpm db:seed` creates these users. The API e2e tests also seed them before they run. They all share the password from `SEED_USER_PASSWORD` in `apps/api/.env`, which defaults to **`helpdesk-dev-password`** (from `.env.example`). They are dev/test accounts only, so never seed them in production.
+`pnpm db:seed` creates these users. The API e2e tests also seed them before they run. Sign-up is disabled, so these are the only accounts.
 
-| Name          | Email                     |
-| ------------- | ------------------------- |
-| Maya Thompson | maya.thompson@example.com |
-| Daniel Okafor | daniel.okafor@example.com |
-| Sofia Ramirez | sofia.ramirez@example.com |
-| Liam Chen     | liam.chen@example.com     |
-| Priya Nair    | priya.nair@example.com    |
+| Name           | Email                     | Role  | Password (from `apps/api/.env`)                           |
+| -------------- | ------------------------- | ----- | --------------------------------------------------------- |
+| Helpdesk Admin | admin@example.com         | admin | `ADMIN_PASSWORD`, default **`password123`**               |
+| Maya Thompson  | maya.thompson@example.com | agent | `SEED_USER_PASSWORD`, default **`helpdesk-dev-password`** |
+| Daniel Okafor  | daniel.okafor@example.com | agent | same                                                      |
+| Sofia Ramirez  | sofia.ramirez@example.com | agent | same                                                      |
+| Liam Chen      | liam.chen@example.com     | agent | same                                                      |
+| Priya Nair     | priya.nair@example.com    | agent | same                                                      |
 
-Seeding skips users that already exist and does not reset their password. To change the password, update `SEED_USER_PASSWORD`, delete the users, and seed again.
+- **The admin** (`ADMIN_EMAIL` / `ADMIN_PASSWORD`) is always ensured: the seed creates it if it is missing, or gives the existing user the admin role. In production, run the seed with your own admin values.
+- **The agents** are seeded only when `SEED_USER_PASSWORD` is set. Leave it unset in production.
+- **Existing users keep their password:** seeding never resets it. To change it, update the variable, delete the user, and seed again.
 
 ## Scripts
 

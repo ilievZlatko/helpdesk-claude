@@ -13,9 +13,16 @@ datasource db {
 }
 
 // ---------------------------------------------------------------------------
-// Authentication (better-auth core schema). Field names must match what
+// Authentication (better-auth core schema + admin plugin fields). Field names must match what
 // better-auth expects; see src/auth/auth.ts.
 // ---------------------------------------------------------------------------
+
+enum UserRole {
+  admin
+  agent
+
+  @@map("user_role")
+}
 
 model User {
   id            String    @id
@@ -25,6 +32,11 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now()) @updatedAt
+  // Admin plugin
+  role          UserRole  @default(agent)
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
   sessions      Session[]
   accounts      Account[]
 
@@ -39,6 +51,8 @@ model Session {
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
+  // Admin plugin: id of the admin impersonating this session's user
+  impersonatedBy String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
