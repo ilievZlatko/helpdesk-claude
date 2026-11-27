@@ -1,6 +1,8 @@
 // `pnpm db:seed`. Idempotent.
 // - Always: guarantees the admin from ADMIN_EMAIL / ADMIN_PASSWORD.
-// - Only when SEED_USER_PASSWORD is set (dev/test): creates the dev agents.
+// - Only when SEED_USER_PASSWORD is set and NODE_ENV is development or test:
+//   creates the dev agents. (validateEnv also rejects SEED_USER_PASSWORD in
+//   production.)
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { validateEnv } from '../src/config/env.js';
@@ -22,7 +24,7 @@ try {
   });
   console.log(`admin    ${env.ADMIN_EMAIL} (${admin})`);
 
-  if (env.SEED_USER_PASSWORD) {
+  if (env.SEED_USER_PASSWORD && env.NODE_ENV !== 'production') {
     const { created, existing } = await seedUsers(
       prisma,
       env,
@@ -31,7 +33,9 @@ try {
     for (const email of created) console.log(`created  ${email}`);
     for (const email of existing) console.log(`exists   ${email}`);
   } else {
-    console.log('SEED_USER_PASSWORD not set: skipping dev users');
+    console.log(
+      'SEED_USER_PASSWORD not set (or production): skipping dev users',
+    );
   }
 } finally {
   await prisma.$disconnect();

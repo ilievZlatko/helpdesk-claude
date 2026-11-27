@@ -91,3 +91,14 @@ model Verification {
   @@index([identifier])
   @@map("verification")
 }
+
+/// better-auth rate limiting (rateLimit.storage = "database"): one row per
+/// client IP + path. `lastRequest` is a Unix time in milliseconds.
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@map("rate_limit")
+}
