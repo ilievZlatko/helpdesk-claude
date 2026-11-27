@@ -3,3 +3,7 @@ coverage
 .turbo
 pnpm-lock.yaml
 apps/api/src/generated
+
+# Skills installed by the `skills` CLI: keep them byte-identical to the
+# source, or they no longer match the hashes in skills-lock.json.
+.agents
