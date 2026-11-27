@@ -22,6 +22,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { authClient } from '@/lib/auth-client';
 
+/** Inputs that sit "in" the frosted card: a translucent off-white, blurred, softly inset. */
+const glassInputClass =
+  'autofill-keep-bg h-10 border-slate-400/25 bg-slate-50/40 shadow-[inset_0_1px_2px_rgb(15_23_42/0.06)] backdrop-blur-md transition-[color,background-color,border-color,box-shadow] placeholder:text-slate-500 hover:bg-slate-50/55 focus-visible:border-primary/60 focus-visible:bg-white/60 focus-visible:ring-primary/20 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 dark:focus-visible:bg-white/10';
+
 function signInErrorMessage(status: number): string {
   if (status === 401) return 'Invalid email or password.';
   if (status === 429) return 'Too many sign-in attempts. Try again later.';
@@ -69,7 +73,7 @@ export function LoginPage() {
         </div>
         <div>
           <p className="text-xl font-semibold tracking-tight">Helpdesk</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-slate-700 dark:text-slate-300">
             AI-powered support, from inbox to answer
           </p>
         </div>
@@ -97,7 +101,8 @@ export function LoginPage() {
                   type="email"
                   autoComplete="email"
                   autoFocus
-                  className="bg-white/60 dark:bg-slate-950/40"
+                  placeholder="name@company.com"
+                  className={glassInputClass}
                   aria-invalid={!!errors.email}
                   {...register('email')}
                 />
@@ -109,7 +114,7 @@ export function LoginPage() {
                   id="password"
                   type="password"
                   autoComplete="current-password"
-                  className="bg-white/60 dark:bg-slate-950/40"
+                  className={glassInputClass}
                   aria-invalid={!!errors.password}
                   {...register('password')}
                 />
@@ -122,7 +127,7 @@ export function LoginPage() {
           </form>
         </CardContent>
       </Card>
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-center text-xs text-slate-700 dark:text-slate-300">
         No account? Ask your helpdesk administrator.
       </p>
     </main>
@@ -138,13 +143,13 @@ export function LoginPage() {
 function LoginBackground() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-      <div className="absolute inset-0 bg-linear-to-br from-sky-200 via-indigo-200 to-violet-300 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" />
-      <div className="absolute -top-[25vmax] -left-[20vmax] size-[55vmax] rounded-full bg-sky-400/35 blur-[100px] motion-safe:animate-drift dark:bg-sky-600/20" />
-      <div className="absolute -right-[20vmax] -bottom-[25vmax] size-[55vmax] rounded-full bg-fuchsia-300/40 blur-[100px] motion-safe:animate-drift motion-safe:[animation-delay:-12s] dark:bg-violet-600/20" />
+      <div className="absolute inset-0 bg-linear-to-br from-sky-300 via-indigo-300 to-violet-400 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" />
+      <div className="absolute -top-[25vmax] -left-[20vmax] size-[55vmax] rounded-full bg-sky-500/35 blur-[100px] motion-safe:animate-drift dark:bg-sky-600/20" />
+      <div className="absolute -right-[20vmax] -bottom-[25vmax] size-[55vmax] rounded-full bg-fuchsia-400/40 blur-[100px] motion-safe:animate-drift motion-safe:[animation-delay:-12s] dark:bg-violet-600/20" />
       <div className="absolute inset-0 bg-[radial-gradient(var(--color-slate-900)_1px,transparent_1px)] bg-size-[24px_24px] opacity-[0.06] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)] dark:bg-[radial-gradient(var(--color-white)_1px,transparent_1px)]" />
       {/* Orbs, positioned from the page centre (where the card is). */}
-      <div className="absolute top-1/2 left-1/2 size-[28rem] -translate-x-[110%] -translate-y-[45%] rounded-full bg-linear-to-br from-blue-500 to-cyan-400 opacity-80 blur-3xl motion-safe:animate-drift dark:opacity-60" />
-      <div className="absolute top-1/2 left-1/2 size-[32rem] translate-x-[8%] -translate-y-[18%] rounded-full bg-linear-to-br from-indigo-500 to-fuchsia-400 opacity-70 blur-3xl motion-safe:animate-drift motion-safe:[animation-delay:-10s] dark:opacity-50" />
+      <div className="absolute top-1/2 left-1/2 size-[28rem] -translate-x-[110%] -translate-y-[45%] rounded-full bg-linear-to-br from-blue-500 to-cyan-400 opacity-90 blur-3xl motion-safe:animate-drift dark:opacity-60" />
+      <div className="absolute top-1/2 left-1/2 size-[32rem] translate-x-[8%] -translate-y-[18%] rounded-full bg-linear-to-br from-indigo-500 to-fuchsia-400 opacity-80 blur-3xl motion-safe:animate-drift motion-safe:[animation-delay:-10s] dark:opacity-50" />
     </div>
   );
 }

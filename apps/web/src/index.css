@@ -116,6 +116,21 @@
   --sidebar-ring: oklch(0.707 0.165 254.624);
 }
 
+/*
+ * Keep an input's own (translucent) background when the browser autofills it.
+ * Autofill paints an opaque background with `!important` UA styles, which
+ * author CSS can't override, but transitions win over them in the cascade:
+ * a ~week-long transition means the autofill colours are never painted.
+ */
+@utility autofill-keep-bg {
+  &:-webkit-autofill,
+  &:autofill {
+    transition:
+      background-color 600000s 0s,
+      color 600000s 0s;
+  }
+}
+
 /* Slow drift for the login page's background glows (`animate-drift`). */
 @theme {
   --animate-drift: drift 24s ease-in-out infinite;
