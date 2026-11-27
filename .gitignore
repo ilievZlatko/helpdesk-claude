@@ -22,3 +22,6 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Claude Code: personal settings (shared settings go in .claude/settings.json)
+.claude/settings.local.json
