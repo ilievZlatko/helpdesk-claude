@@ -1,6 +1,6 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { LogOut, Palette, Settings } from 'lucide-react';
-import { Link, useNavigate } from 'react-router';
+import { UserRole } from '@helpdesk/shared';
+import { LogOut, Palette, Settings, Users } from 'lucide-react';
+import { Link } from 'react-router';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,30 +19,20 @@ import { themeOptions } from '@/modules/theme/theme-options';
 import { authClient } from './auth-client';
 import { UserAvatar } from './user-avatar';
 import { roleLabel } from './user-display';
+import { useSignOut } from './use-sign-out';
 
 /**
  * Avatar button for the header. Opens a menu with who is signed in (static,
- * not an item), Settings, a Theme submenu, and Sign out.
+ * not an item), Users (admins only), Settings, a Theme submenu, and Sign out.
  */
 export function UserMenu() {
   const { data: session } = authClient.useSession();
   const { theme, setTheme } = useTheme();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const signOut = useSignOut();
 
   if (!session) return null;
   const { user } = session;
   const role = roleLabel(user.role);
-
-  async function signOut() {
-    try {
-      await authClient.signOut();
-    } finally {
-      // Drop cached server data so the next user starts clean.
-      queryClient.clear();
-      void navigate('/login', { replace: true });
-    }
-  }
 
   return (
     <DropdownMenu>
@@ -71,6 +61,14 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {user.role === UserRole.Admin && (
+          <DropdownMenuItem asChild>
+            <Link to="/users">
+              <Users aria-hidden />
+              Users
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link to="/settings">
             <Settings aria-hidden />

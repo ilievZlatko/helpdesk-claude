@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { ThemeProvider } from '@/modules/theme/theme-provider';
 import { UserMenu } from '../user-menu';
 
-const auth = vi.hoisted(() => ({ signOut: vi.fn() }));
+const auth = vi.hoisted(() => ({ signOut: vi.fn(), role: 'admin' }));
 
 vi.mock('@/modules/auth/auth-client', () => ({
   authClient: {
@@ -14,7 +14,7 @@ vi.mock('@/modules/auth/auth-client', () => ({
         user: {
           name: 'Maya Thompson',
           email: 'maya.thompson@example.com',
-          role: 'admin',
+          role: auth.role,
           image: null,
         },
       },
@@ -25,6 +25,7 @@ vi.mock('@/modules/auth/auth-client', () => ({
 }));
 
 beforeEach(() => {
+  auth.role = 'admin';
   auth.signOut.mockReset().mockResolvedValue({ data: { success: true } });
 });
 
@@ -38,6 +39,7 @@ function renderMenu() {
           <Routes>
             <Route path="/" element={<UserMenu />} />
             <Route path="/settings" element={<p>Settings page</p>} />
+            <Route path="/users" element={<p>Users page</p>} />
             <Route path="/login" element={<p>Login page</p>} />
           </Routes>
         </MemoryRouter>
@@ -73,7 +75,27 @@ describe('UserMenu', () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getAllByRole('menuitem').map((item) => item.textContent),
-    ).toEqual(['Settings', 'Theme', 'Sign out']);
+    ).toEqual(['Users', 'Settings', 'Theme', 'Sign out']);
+  });
+
+  it('hides the Users item from agents', async () => {
+    auth.role = 'agent';
+    const { user } = renderMenu();
+    await openMenu(user);
+
+    expect(
+      screen.queryByRole('menuitem', { name: 'Users' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Agent')).toBeInTheDocument();
+  });
+
+  it('goes to the users page (admins)', async () => {
+    const { user } = renderMenu();
+    await openMenu(user);
+
+    await user.click(screen.getByRole('menuitem', { name: 'Users' }));
+
+    expect(await screen.findByText('Users page')).toBeInTheDocument();
   });
 
   it('goes to the settings page', async () => {

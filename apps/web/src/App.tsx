@@ -1,9 +1,15 @@
+import { UserRole } from '@helpdesk/shared';
 import { Navigate, Route, Routes } from 'react-router';
 import { AppLayout } from '@/modules/layouts/app-layout';
-import { RequireAuth, RequireGuest } from '@/modules/routes/route-guards';
+import {
+  RequireAuth,
+  RequireGuest,
+  RequireRole,
+} from '@/modules/routes/route-guards';
 import { HomePage } from '@/pages/home.page';
 import { LoginPage } from '@/pages/login.page';
 import { SettingsPage } from '@/pages/settings.page';
+import { UsersPage } from '@/pages/users.page';
 
 function App() {
   return (
@@ -15,6 +21,9 @@ function App() {
         <Route element={<AppLayout />}>
           <Route index element={<HomePage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route element={<RequireRole roles={[UserRole.Admin]} />}>
+            <Route path="users" element={<UsersPage />} />
+          </Route>
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
