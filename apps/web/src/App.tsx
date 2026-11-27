@@ -1,8 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router';
-import { AppLayout } from '@/components/app-layout';
-import { RequireAuth, RequireGuest } from '@/components/route-guards';
-import { HomePage } from '@/pages/home-page';
-import { LoginPage } from '@/pages/login-page';
+import { AppLayout } from '@/modules/layouts/app-layout';
+import { RequireAuth, RequireGuest } from '@/modules/routes/route-guards';
+import { HomePage } from '@/pages/home.page';
+import { LoginPage } from '@/pages/login.page';
 
 function App() {
   return (

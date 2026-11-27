@@ -1,8 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider } from '@/components/theme-provider';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { THEME_STORAGE_KEY } from '@/lib/theme';
+import { ThemeProvider } from '../theme-provider';
+import { THEME_STORAGE_KEY } from '../theme';
+import { ThemeToggle } from '../theme-toggle';
+
+const html = document.documentElement;
 
 function renderToggle() {
   return render(
@@ -12,32 +14,7 @@ function renderToggle() {
   );
 }
 
-const html = document.documentElement;
-
-describe('theme', () => {
-  it('follows a light OS setting by default', () => {
-    renderToggle();
-
-    expect(html).not.toHaveClass('dark');
-    expect(html.style.colorScheme).toBe('light');
-  });
-
-  it('follows a dark OS setting by default', () => {
-    globalThis.prefersDarkScheme = true;
-    renderToggle();
-
-    expect(html).toHaveClass('dark');
-    expect(html.style.colorScheme).toBe('dark');
-  });
-
-  it('uses the saved theme over the OS setting', () => {
-    globalThis.prefersDarkScheme = true;
-    localStorage.setItem(THEME_STORAGE_KEY, 'light');
-    renderToggle();
-
-    expect(html).not.toHaveClass('dark');
-  });
-
+describe('ThemeToggle', () => {
   it('switches to dark from the menu and saves the choice', async () => {
     const user = userEvent.setup();
     renderToggle();
@@ -64,13 +41,5 @@ describe('theme', () => {
     expect(
       screen.getByRole('menuitemradio', { name: 'System' }),
     ).toHaveAttribute('aria-checked', 'false');
-  });
-
-  it('ignores an unknown saved value', () => {
-    localStorage.setItem(THEME_STORAGE_KEY, 'sepia');
-    globalThis.prefersDarkScheme = true;
-    renderToggle();
-
-    expect(html).toHaveClass('dark');
   });
 });

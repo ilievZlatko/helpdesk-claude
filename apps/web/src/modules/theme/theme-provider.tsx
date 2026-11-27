@@ -7,7 +7,7 @@ import {
   readStoredTheme,
   type Theme,
   type ThemeContextValue,
-} from '@/lib/theme';
+} from './theme';
 
 function subscribeToSystemScheme(onChange: () => void) {
   const media = window.matchMedia(darkSchemeQuery);

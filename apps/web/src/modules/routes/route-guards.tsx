@@ -1,9 +1,9 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
-import { authClient } from '@/lib/auth-client';
+import { authClient } from '@/modules/auth/auth-client';
 import {
   useRedirectAfterLogin,
   type LoginLocationState,
-} from '@/lib/login-redirect';
+} from '@/modules/auth/login-redirect';
 
 function FullPageMessage({ children }: { children: React.ReactNode }) {
   return (

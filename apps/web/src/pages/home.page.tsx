@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { fetchHealth } from '@/lib/api';
-import { authClient } from '@/lib/auth-client';
+import { authClient } from '@/modules/auth/auth-client';
 
 export function HomePage() {
   const { data: session } = authClient.useSession();

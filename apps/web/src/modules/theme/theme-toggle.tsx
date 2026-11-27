@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { isTheme, useTheme } from '@/lib/theme';
+import { isTheme, useTheme } from './theme';
 
 const options = [
   { value: 'light', label: 'Light', Icon: Sun },

@@ -2,9 +2,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { LifeBuoy, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { authClient } from '@/lib/auth-client';
+import { authClient } from '@/modules/auth/auth-client';
+import { ThemeToggle } from '@/modules/theme/theme-toggle';
 
 /** Shell for signed-in pages: a top nav bar with the current user. */
 export function AppLayout() {

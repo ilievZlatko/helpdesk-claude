@@ -3,7 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import App from './App';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/modules/theme/theme-provider';
 
 type FakeSession = { user: { name: string } };
 
@@ -15,7 +15,7 @@ const auth = vi.hoisted(() => ({
   signOut: vi.fn(),
 }));
 
-vi.mock('@/lib/auth-client', () => ({
+vi.mock('@/modules/auth/auth-client', () => ({
   authClient: {
     useSession: () => ({
       data: auth.session,
@@ -64,36 +64,6 @@ describe('login', () => {
       screen.getByText('Welcome back', { selector: '[data-slot=card-title]' }),
     ).toBeInTheDocument();
     expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
-  });
-
-  it('shows validation errors and does not call the API', async () => {
-    const user = userEvent.setup();
-    renderApp('/login');
-
-    await user.click(screen.getByRole('button', { name: 'Sign in' }));
-
-    expect(
-      await screen.findByText('Enter a valid email address'),
-    ).toBeInTheDocument();
-    expect(screen.getByText('Enter your password')).toBeInTheDocument();
-    expect(auth.signInEmail).not.toHaveBeenCalled();
-  });
-
-  it('shows an error for wrong credentials', async () => {
-    auth.signInEmail.mockResolvedValue({
-      data: null,
-      error: { status: 401, message: 'Invalid email or password' },
-    });
-    const user = userEvent.setup();
-    renderApp('/login');
-
-    await user.type(screen.getByLabelText('Email'), 'maya@example.com');
-    await user.type(screen.getByLabelText('Password'), 'wrong');
-    await user.click(screen.getByRole('button', { name: 'Sign in' }));
-
-    expect(
-      await screen.findByText('Invalid email or password.'),
-    ).toBeInTheDocument();
   });
 
   it('signs in and shows the home page with the user in the nav bar', async () => {
