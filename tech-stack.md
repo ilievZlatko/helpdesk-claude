@@ -13,7 +13,7 @@ TypeScript end to end, organized as a monorepo so the API and UI can share types
 | Backend                    | NestJS                                                                               |
 | Database / ORM             | PostgreSQL + Prisma                                                                  |
 | Validation                 | Zod (shared schemas, used in NestJS via the built-in `StandardSchemaValidationPipe`) |
-| Authentication             | Database-backed sessions (see below)                                                 |
+| Authentication             | better-auth (email/password, database sessions; see below)                           |
 | Background jobs            | pg-boss (Postgres-backed queue)                                                      |
 | Email (inbound + outbound) | Postmark (or SendGrid / Mailgun)                                                     |
 | AI                         | Claude API via `@anthropic-ai/sdk`, model `claude-opus-5-5`                          |
@@ -46,7 +46,7 @@ Organized into feature modules:
 
 | Module                | Responsibility                                          |
 | --------------------- | ------------------------------------------------------- |
-| `AuthModule`          | Login, logout, session management, guards               |
+| `AuthModule`          | better-auth routes and global guard (library module)    |
 | `UsersModule`         | Agent management (admin only)                           |
 | `TicketsModule`       | Ticket CRUD, filtering, sorting, status changes         |
 | `EmailModule`         | Inbound email webhook, outbound replies, threading      |
@@ -56,16 +56,18 @@ Organized into feature modules:
 
 NestJS integrates with Prisma through a `PrismaService` provided via a global `PrismaModule`.
 
-## Authentication: Database Sessions
+## Authentication: better-auth
 
-- On login, the API creates a row in a `Session` table (Postgres, via Prisma) and sets the session ID in a cookie.
-- Cookie flags: `httpOnly`, `Secure`, `SameSite=Lax`. The session ID is a cryptographically random, opaque token; only its hash is stored in the database.
-- Each request looks up the session by the cookie. The lookup rejects expired sessions and loads the user and their role.
-- Logout deletes the session row. An admin can revoke all sessions for an agent, for example when the agent is deactivated.
-- Passwords are hashed with **argon2**.
-- Authorization uses NestJS guards: an `AuthGuard` for logged-in users and a `RolesGuard` with a `@Roles('admin')` decorator for admin-only routes.
+- **[better-auth](https://better-auth.com)** handles sign-up, sign-in, sign-out and sessions with email/password. The instance is built in `apps/api/src/auth/auth.ts`.
+- **Database sessions:** better-auth stores sessions in the Postgres `session` table through its Prisma adapter, and uses the `user`, `account` and `verification` tables alongside it. There is no secondary storage and no cookie cache, so each request checks the session against the database. Sign-out deletes the session row.
+- **Cookie:** a signed session token cookie, `httpOnly` and `SameSite=Lax`, and `Secure` when `BETTER_AUTH_URL` is https. Requests that change state are checked against `trustedOrigins` (`WEB_ORIGIN`) to prevent CSRF.
+- **Passwords** are hashed with scrypt, better-auth's default.
+- **Routes:** better-auth serves its own endpoints under `/api/auth/*`, for example `POST /api/auth/sign-up/email`, `POST /api/auth/sign-in/email`, `POST /api/auth/sign-out` and `GET /api/auth/get-session`.
+- **NestJS integration:** [`@thallesp/nestjs-better-auth`](https://github.com/ThallesP/nestjs-better-auth). Its `AuthModule` (wired in `app.module.ts`) mounts the handler and registers a global `AuthGuard`, so every route needs a session unless it is marked `@AllowAnonymous()` or `@OptionalAuth()`. Read the session with `@Session()`. Nest's body parser is disabled in `main.ts`, and the module re-adds it for non-auth routes.
 
-### Roles
+### Roles (not implemented yet)
+
+Planned with better-auth's admin plugin, or a `role` additional field, plus `@Roles(['admin'])` from the Nest integration.
 
 - **Admin**: seeded at deploy time from environment variables (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) by a Prisma seed script. Can create and manage agents.
 - **Agent**: created by the admin. Works on tickets.
