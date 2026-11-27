@@ -26,7 +26,7 @@ export function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-muted">
+    <div className="flex min-h-svh flex-col bg-linear-to-br from-slate-100 via-sky-50 to-indigo-50 bg-fixed dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
       {/* Sticky, translucent header: content scrolls under it, blurred. Falls
           back to near-opaque where backdrop-filter is unsupported. */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">

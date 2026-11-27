@@ -77,6 +77,18 @@ Before calling a task done, run `pnpm lint && pnpm typecheck && pnpm test` (and 
 - **Tests:** Vitest everywhere (`vi.fn()`, not `jest.fn()`). Unit tests sit next to the code (`*.spec.ts` in api, `*.test.ts` in shared), except in web modules, where they go in the module's `test/` folder (`*.test.ts(x)`). Cover changed behavior with focused tests.
 - **Formatting:** Prettier with single quotes and trailing commas. Run `pnpm format` before finishing.
 
+## Design language (web)
+
+Follow this look for all new UI. The reference screens are the login page and the signed-in home page.
+
+- **Accent:** blue-600 (`--primary`) in both themes, for buttons, focus rings and the logo. Lighter blues fail WCAG AA with white text.
+- **Light theme:** shadcn's neutral tokens with white cards; signed-in pages sit on a very subtle cool gradient, `slate-100 → sky-50 → indigo-50` (between light gray and blue; the light mirror of the dark gradient). Keep it barely-there: no stronger blues behind content.
+- **Dark theme is navy, never gray or black:** tokens use Tailwind's slate scale (background slate-950, cards and popovers slate-900, muted/secondary/accent slate-800, muted text slate-400, text slate-50), and signed-in pages use the login page's gradient, `slate-950 → slate-900 → indigo-950`. Don't introduce neutral grays (`oklch(x 0 0)`) or `zinc`/`neutral`/`gray` colors in dark mode.
+- **Header:** sticky and translucent, `bg-background/70` with `backdrop-blur-md`, so content scrolls under it.
+- **Login page:** frosted-glass card (translucent white, `backdrop-blur-2xl`, light white border, soft indigo shadow) over a sky → indigo → violet gradient with large blurred blue/cyan and indigo/pink orbs (`src/components/login-background.tsx`). Inputs on glass are translucent off-white and keep their background on autofill (`autofill-keep-bg` in `index.css`).
+- **Motion and contrast:** decorative motion is slow and wrapped in `motion-safe:`; text placed on gradients or glass must stay readable (darken it, e.g. `text-slate-700 dark:text-slate-300`, rather than using `text-muted-foreground`).
+- Use the theme tokens (`bg-background`, `bg-card`, `text-muted-foreground`, …) instead of raw colors, so both themes stay consistent.
+
 ## Secrets
 
 - `.env` files are gitignored. Never commit secrets or print their values.
