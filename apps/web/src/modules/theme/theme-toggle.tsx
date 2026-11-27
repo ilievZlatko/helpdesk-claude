@@ -1,4 +1,4 @@
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,12 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { isTheme, useTheme } from './theme';
-
-const options = [
-  { value: 'light', label: 'Light', Icon: Sun },
-  { value: 'dark', label: 'Dark', Icon: Moon },
-  { value: 'system', label: 'System', Icon: Monitor },
-] as const;
+import { themeOptions } from './theme-options';
 
 /** Icon button that opens a Light / Dark / System menu. */
 export function ThemeToggle({ className }: { className?: string }) {
@@ -40,7 +35,7 @@ export function ThemeToggle({ className }: { className?: string }) {
             if (isTheme(value)) setTheme(value);
           }}
         >
-          {options.map(({ value, label, Icon }) => (
+          {themeOptions.map(({ value, label, Icon }) => (
             <DropdownMenuRadioItem key={value} value={value}>
               <Icon aria-hidden />
               {label}

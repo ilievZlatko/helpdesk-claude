@@ -3,6 +3,7 @@ import { AppLayout } from '@/modules/layouts/app-layout';
 import { RequireAuth, RequireGuest } from '@/modules/routes/route-guards';
 import { HomePage } from '@/pages/home.page';
 import { LoginPage } from '@/pages/login.page';
+import { SettingsPage } from '@/pages/settings.page';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
