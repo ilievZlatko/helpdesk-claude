@@ -15,6 +15,7 @@ jobs:
     env:
       TURBO_TELEMETRY_DISABLED: 1
       DATABASE_URL: postgresql://helpdesk:helpdesk@localhost:5432/helpdesk
+      BETTER_AUTH_URL: http://localhost:3000
     services:
       postgres:
         image: postgres:18-alpine
@@ -49,6 +50,9 @@ jobs:
 
       - name: Apply database migrations
         run: pnpm --filter @helpdesk/api db:deploy
+
+      - name: Generate a throwaway better-auth secret
+        run: echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
 
       - name: API e2e tests
         run: pnpm --filter @helpdesk/api test:e2e
