@@ -1,5 +1,11 @@
 import { UserRole } from '@helpdesk/shared';
-import { House, LifeBuoy, LogOut, Users, type LucideIcon } from 'lucide-react';
+import {
+  HouseIcon,
+  LifebuoyIcon,
+  PowerIcon,
+  UsersIcon,
+  type Icon,
+} from '@phosphor-icons/react';
 import { Link, useLocation } from 'react-router';
 import {
   Sidebar,
@@ -19,14 +25,14 @@ import { useSignOut } from '@/modules/auth/use-sign-out';
 type NavItem = {
   label: string;
   to: string;
-  Icon: LucideIcon;
+  Icon: Icon;
   /** Only users with one of these roles see the item; everyone when omitted. */
   roles?: UserRole[];
 };
 
 const navItems: NavItem[] = [
-  { label: 'Home', to: '/', Icon: House },
-  { label: 'Users', to: '/users', Icon: Users, roles: [UserRole.Admin] },
+  { label: 'Home', to: '/', Icon: HouseIcon },
+  { label: 'Users', to: '/users', Icon: UsersIcon, roles: [UserRole.Admin] },
 ];
 
 function isActive(pathname: string, to: string) {
@@ -66,7 +72,7 @@ export function AppSidebar() {
             >
               <Link to="/">
                 <span className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm shadow-primary/30">
-                  <LifeBuoy className="size-4" aria-hidden />
+                  <LifebuoyIcon className="size-4" aria-hidden />
                 </span>
                 <span className="text-base font-semibold">Helpdesk</span>
               </Link>
@@ -106,7 +112,7 @@ export function AppSidebar() {
               onClick={() => void signOut()}
               className="hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20 [&:hover>svg]:text-destructive"
             >
-              <LogOut aria-hidden />
+              <PowerIcon aria-hidden />
               <span>Sign out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>

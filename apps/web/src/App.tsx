@@ -6,6 +6,7 @@ import {
   RequireGuest,
   RequireRole,
 } from '@/modules/routes/route-guards';
+import { AccountPage } from '@/pages/account.page';
 import { HomePage } from '@/pages/home.page';
 import { LoginPage } from '@/pages/login.page';
 import { SettingsPage } from '@/pages/settings.page';
@@ -20,6 +21,7 @@ function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="account" element={<AccountPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route element={<RequireRole roles={[UserRole.Admin]} />}>
             <Route path="users" element={<UsersPage />} />

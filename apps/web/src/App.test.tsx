@@ -156,7 +156,7 @@ describe('home page', () => {
   });
 });
 
-describe('settings page', () => {
+describe('account page', () => {
   beforeEach(() => {
     auth.session = maya;
   });
@@ -167,13 +167,35 @@ describe('settings page', () => {
     renderApp('/');
 
     await user.click(screen.getByRole('button', { name: 'Open user menu' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Account' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Account' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('maya.thompson@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Agent')).toBeInTheDocument();
+  });
+});
+
+describe('settings page', () => {
+  beforeEach(() => {
+    auth.session = maya;
+  });
+
+  it('opens from the user menu and shows Appearance', async () => {
+    mockHealthOk();
+    const user = userEvent.setup();
+    renderApp('/');
+
+    await user.click(screen.getByRole('button', { name: 'Open user menu' }));
     await user.click(await screen.findByRole('menuitem', { name: 'Settings' }));
 
     expect(
       await screen.findByRole('heading', { name: 'Settings' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('maya.thompson@example.com')).toBeInTheDocument();
-    expect(screen.getByText('Agent')).toBeInTheDocument();
+    expect(
+      screen.getByRole('radiogroup', { name: 'Theme' }),
+    ).toBeInTheDocument();
   });
 
   it('changes the theme from the Appearance section', async () => {

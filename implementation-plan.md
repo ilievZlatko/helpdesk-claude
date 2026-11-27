@@ -69,7 +69,7 @@ These are working assumptions, not final decisions. They can be revisited withou
 - [ ] 2.6 Users page in `web`: table of users with role and status (admin-only `/users` route with a heading: done)
 - [ ] 2.7 Create-agent dialog
 - [ ] 2.8 Edit / deactivate actions
-- [x] 2.9 Hide the admin navigation from agents (the Users item in the avatar menu shows only for admins; `/users` sends agents home)
+- [x] 2.9 Hide the admin navigation from agents (the Users item in the sidebar shows only for admins; `/users` sends agents home)
 - [ ] 2.10 Tests: agents cannot reach user endpoints; a deactivated user cannot log in
 
 **Done when:** the admin creates an agent, the agent logs in, the admin deactivates them, and the agent is logged out.

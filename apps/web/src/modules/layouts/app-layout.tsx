@@ -4,16 +4,23 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 import { UserMenu } from '@/modules/auth/user-menu';
+import { ThemeSwitch } from '@/modules/theme/theme-switch';
 import { AppSidebar } from './app-sidebar';
 import { HeaderSearch } from './header-search';
 import { NotificationsMenu } from './notifications-menu';
 
 /**
  * Shell for signed-in pages: the collapsible sidebar on the left, and a
- * transparent header (sidebar toggle, search, notifications, user menu) over
- * the page background.
+ * transparent header (sidebar toggle, search, notifications, theme switch,
+ * user menu) over the page background.
  */
+/** Round, bordered, translucent icon buttons in the header (sidebar toggle,
+ * bell, theme). */
+const headerIconButton =
+  'bg-background/60 shadow-none backdrop-blur-md dark:bg-white/5 dark:hover:bg-white/10';
+
 export function AppLayout() {
   return (
     <SidebarProvider
@@ -26,10 +33,15 @@ export function AppLayout() {
         {/* Transparent so the page background shows; the blur only matters
             when content scrolls under it. */}
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 px-4 backdrop-blur-md sm:px-6">
-          <SidebarTrigger className="-ml-1 shrink-0" />
+          <SidebarTrigger
+            variant="outline"
+            size="icon-sm"
+            className={cn('size-8 shrink-0 rounded-full', headerIconButton)}
+          />
           <HeaderSearch className="mx-auto" />
           <div className="flex shrink-0 items-center gap-2">
-            <NotificationsMenu />
+            <NotificationsMenu className={headerIconButton} />
+            <ThemeSwitch className={headerIconButton} />
             <UserMenu />
           </div>
         </header>

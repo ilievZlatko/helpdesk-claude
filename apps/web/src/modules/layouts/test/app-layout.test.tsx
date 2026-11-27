@@ -135,6 +135,19 @@ describe('AppLayout header', () => {
     );
   });
 
+  it('shows the bell, then the theme switch, then the avatar', () => {
+    renderLayout();
+
+    const bell = screen.getByRole('button', { name: 'Notifications' });
+    const theme = screen.getByRole('button', { name: /Switch to .* theme/ });
+    const avatar = screen.getByRole('button', { name: 'Open user menu' });
+    const follows = (a: Node, b: Node) =>
+      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+    expect(follows(bell, theme)).toBe(true);
+    expect(follows(theme, avatar)).toBe(true);
+  });
+
   it('opens an empty notifications panel from the bell', async () => {
     const user = renderLayout();
 

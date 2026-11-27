@@ -1,5 +1,6 @@
-import { Bell, BellOff } from 'lucide-react';
+import { BellIcon, BellSlashIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,24 +13,24 @@ import {
  * Bell button in the header. There are no notifications yet, so it opens an
  * empty state; it will list notifications once they exist.
  */
-export function NotificationsMenu() {
+export function NotificationsMenu({ className }: { className?: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full"
+          variant="outline"
+          size="icon-sm"
+          className={cn('rounded-full', className)}
           aria-label="Notifications"
         >
-          <Bell />
+          <BellIcon />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72">
         <DropdownMenuLabel>Notifications</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-          <BellOff className="size-5 text-muted-foreground" aria-hidden />
+          <BellSlashIcon className="size-5 text-muted-foreground" aria-hidden />
           <p className="text-sm font-medium">You're all caught up</p>
           <p className="text-xs text-muted-foreground">
             New notifications will show up here.

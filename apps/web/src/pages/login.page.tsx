@@ -1,4 +1,4 @@
-import { LifeBuoy } from 'lucide-react';
+import { LifebuoyIcon } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router';
 import { ThemeToggle } from '@/modules/theme/theme-toggle';
 import { LoginBackground } from '@/components/login-background';
@@ -15,7 +15,7 @@ export function LoginPage() {
       <ThemeToggle className="absolute top-4 right-4 hover:bg-white/40 dark:hover:bg-white/10" />
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/30">
-          <LifeBuoy className="size-6" aria-hidden />
+          <LifebuoyIcon className="size-6" aria-hidden />
         </div>
         <div>
           <p className="text-xl font-semibold tracking-tight">Helpdesk</p>
