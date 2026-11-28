@@ -50,6 +50,10 @@ export function createAuth(prisma: PrismaClient, env: AuthEnv) {
       storage: 'database',
     },
     advanced: {
+      // Explicit: better-auth skips its Origin and CSRF checks by default
+      // when NODE_ENV is "test", so the e2e and API tests would never
+      // exercise them. Keep them on everywhere.
+      disableOriginCheck: false,
       ipAddress: {
         // Default: X-Forwarded-For (a single value is trusted as the client).
         ipAddressHeaders: env.CLIENT_IP_HEADER
