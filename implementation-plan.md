@@ -62,11 +62,11 @@ These are working assumptions, not final decisions. They can be revisited withou
 **Goal:** the admin can create and manage agents.
 
 - [ ] 2.1 Shared Zod schemas for create/update user
-- [ ] 2.2 `GET /users`: list users (admin only)
+- [x] 2.2 `GET /users`: list users (admin only): `GET /api/users`, sorted by name, with role and status (active, or deactivated = banned through the better-auth admin plugin)
 - [ ] 2.3 `POST /users`: create an agent with an initial password (admin only)
 - [ ] 2.4 `PATCH /users/:id`: update name/email, activate/deactivate (admin only)
 - [ ] 2.5 When an agent is deactivated, revoke all their sessions and block login
-- [ ] 2.6 Users page in `web`: table of users with role and status (admin-only `/users` route with a heading: done)
+- [x] 2.6 Users page in `web`: table of users with role and status (admin-only `/users` route; `modules/users/`)
 - [ ] 2.7 Create-agent dialog
 - [ ] 2.8 Edit / deactivate actions
 - [x] 2.9 Hide the admin navigation from agents (the Users item in the sidebar shows only for admins; `/users` sends agents home)
