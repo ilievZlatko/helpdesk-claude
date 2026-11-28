@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/card';
 import { fetchHealth } from '@/lib/api';
 import { authClient } from '@/modules/auth/auth-client';
+import { PageHeader } from '@/modules/layouts/page-header';
 
 export function HomePage() {
   const { data: session } = authClient.useSession();
@@ -16,14 +17,10 @@ export function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">
-          Welcome, {session?.user.name}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          AI-powered ticket management
-        </p>
-      </div>
+      <PageHeader
+        title={`Welcome, ${session?.user.name ?? ''}`}
+        description="AI-powered ticket management"
+      />
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>System status</CardTitle>

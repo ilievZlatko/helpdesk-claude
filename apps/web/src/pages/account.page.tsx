@@ -8,6 +8,7 @@ import {
 import { authClient } from '@/modules/auth/auth-client';
 import { UserAvatar } from '@/modules/auth/user-avatar';
 import { roleLabel } from '@/modules/auth/user-display';
+import { PageHeader } from '@/modules/layouts/page-header';
 
 export function AccountPage() {
   const { data: session } = authClient.useSession();
@@ -16,12 +17,7 @@ export function AccountPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Account</h1>
-        <p className="text-sm text-muted-foreground">
-          Who you are signed in as.
-        </p>
-      </div>
+      <PageHeader title="Account" description="Who you are signed in as." />
 
       <Card>
         <CardHeader>
