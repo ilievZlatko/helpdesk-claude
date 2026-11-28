@@ -70,7 +70,7 @@ describe('login', () => {
     renderApp('/');
 
     expect(
-      screen.getByText('Welcome back', { selector: '[data-slot=card-title]' }),
+      screen.getByRole('heading', { level: 1, name: 'Welcome back' }),
     ).toBeInTheDocument();
     expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
   });

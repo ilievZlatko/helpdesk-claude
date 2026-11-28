@@ -67,6 +67,7 @@ describe('LoginForm', () => {
     [401, 'Invalid email or password.'],
     [429, 'Too many sign-in attempts. Try again later.'],
     [500, 'Something went wrong. Please try again.'],
+    [403, 'Something went wrong. Please try again.'],
   ])('shows a message for a %i response', async (status, message) => {
     auth.signInEmail.mockResolvedValue({
       data: null,
@@ -78,6 +79,30 @@ describe('LoginForm', () => {
 
     expect(await screen.findByText(message)).toBeInTheDocument();
     expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it('tells a banned user their account is disabled', async () => {
+    auth.signInEmail.mockResolvedValue({
+      data: null,
+      error: { status: 403, code: 'BANNED_USER', message: 'error' },
+    });
+    const { user, onSuccess } = renderForm();
+
+    await submit(user);
+
+    expect(
+      await screen.findByText(
+        'Your account has been disabled. Contact your administrator.',
+      ),
+    ).toBeInTheDocument();
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it('has a page heading', () => {
+    renderForm();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Welcome back' }),
+    ).toBeInTheDocument();
   });
 
   it('shows a message when the server cannot be reached', async () => {

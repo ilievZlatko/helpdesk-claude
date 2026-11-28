@@ -25,9 +25,14 @@ import { cn } from '@/lib/utils';
 const glassInputClass =
   'autofill-keep-bg h-10 border-slate-400/25 bg-slate-50/40 shadow-[inset_0_1px_2px_rgb(15_23_42/0.06)] backdrop-blur-md transition-[color,background-color,border-color,box-shadow] placeholder:text-slate-500 hover:bg-slate-50/55 focus-visible:border-primary/60 focus-visible:bg-white/60 focus-visible:ring-primary/20 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 dark:focus-visible:bg-white/10';
 
-function signInErrorMessage(status: number): string {
-  if (status === 401) return 'Invalid email or password.';
-  if (status === 429) return 'Too many sign-in attempts. Try again later.';
+function signInErrorMessage(error: { status: number; code?: string }): string {
+  // better-auth's admin plugin rejects banned users with 403 BANNED_USER.
+  if (error.code === 'BANNED_USER') {
+    return 'Your account has been disabled. Contact your administrator.';
+  }
+  if (error.status === 401) return 'Invalid email or password.';
+  if (error.status === 429)
+    return 'Too many sign-in attempts. Try again later.';
   return 'Something went wrong. Please try again.';
 }
 
@@ -61,7 +66,7 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
     try {
       const { error } = await authClient.signIn.email(values);
       if (error) {
-        setError('root', { message: signInErrorMessage(error.status) });
+        setError('root', { message: signInErrorMessage(error) });
         return;
       }
     } catch {
@@ -82,7 +87,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
       )}
     >
       <CardHeader>
-        <CardTitle className="text-lg">Welcome back</CardTitle>
+        <CardTitle>
+          <h1 className="text-lg">Welcome back</h1>
+        </CardTitle>
         <CardDescription>
           Enter your email and password to sign in.
         </CardDescription>

@@ -27,6 +27,15 @@ describe('createAuth rate limiting', () => {
     expect(rateLimit?.enabled).toBe(false);
   });
 
+  it.each(['development', 'test', 'production'] as const)(
+    'keeps the Origin/CSRF checks on in %s',
+    (NODE_ENV) => {
+      const { advanced } = createAuth(prisma, { ...env, NODE_ENV }).options;
+      expect(advanced?.disableOriginCheck).toBe(false);
+      expect(advanced).not.toHaveProperty('disableCSRFCheck');
+    },
+  );
+
   it('reads the client IP from CLIENT_IP_HEADER when set', () => {
     const { advanced } = createAuth(prisma, {
       ...env,
