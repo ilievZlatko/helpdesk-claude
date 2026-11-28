@@ -7,6 +7,7 @@ import { UserRole } from '@helpdesk/shared';
 import { inject } from 'vitest';
 import { AppModule } from './../src/app.module.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
+import { CreatedSessions } from './sessions.js';
 
 // A route with no @AllowAnonymous(), so the global AuthGuard protects it.
 @Controller('protected')
@@ -51,7 +52,7 @@ describe('Auth (e2e)', () => {
     const cookies = res.get('Set-Cookie') ?? [];
     const cookie = cookies.find((c) => c.includes('session_token='));
     expect(cookie).toBeDefined();
-    return cookie!.split(';')[0]!;
+    return sessions.track(cookie!.split(';')[0]!);
   }
 
   const signIn = (password = seedUser.password, email = seedUser.email) =>
@@ -61,14 +62,9 @@ describe('Auth (e2e)', () => {
 
   // Sessions created by these tests, removed in afterAll so a manual login as
   // the same users is not affected.
-  const startedAt = new Date();
+  const sessions = new CreatedSessions();
   afterAll(async () => {
-    await app.get(PrismaService).session.deleteMany({
-      where: {
-        user: { email: { in: [seedUser.email, adminUser.email] } },
-        createdAt: { gte: startedAt },
-      },
-    });
+    await sessions.deleteAll(app.get(PrismaService));
   });
 
   describe('sign-up', () => {
