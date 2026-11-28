@@ -147,6 +147,9 @@ importers:
       '@helpdesk/api':
         specifier: workspace:*
         version: link:../api
+      '@helpdesk/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@helpdesk/web':
         specifier: workspace:*
         version: link:../web

@@ -8,18 +8,17 @@ import {
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/modules/theme/theme';
 import { themeOptions } from '@/modules/theme/theme-options';
+import { PageHeader } from '@/modules/layouts/page-header';
 
 export function SettingsPage() {
   const { theme, setTheme } = useTheme();
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          How the helpdesk looks for you.
-        </p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="How the helpdesk looks for you."
+      />
 
       <Card>
         <CardHeader>

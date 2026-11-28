@@ -25,6 +25,18 @@ export const AGENT = {
 };
 
 /**
+ * All seeded agents (SEED_USERS in apps/api/prisma/seed-users.ts, which can't
+ * be imported here). Never change them: other tests sign in with them.
+ */
+export const SEED_AGENTS = [
+  AGENT,
+  { name: 'Daniel Okafor', email: 'daniel.okafor@example.com' },
+  { name: 'Sofia Ramirez', email: 'sofia.ramirez@example.com' },
+  { name: 'Liam Chen', email: 'liam.chen@example.com' },
+  { name: 'Priya Nair', email: 'priya.nair@example.com' },
+] as const;
+
+/**
  * Header for state-changing auth requests. The browser sends it on its own;
  * Playwright's API client doesn't, and better-auth checks it against
  * trustedOrigins (outside NODE_ENV=test).
@@ -100,4 +112,19 @@ export async function findUsersByEmail(
   expect(response.status()).toBe(200);
   const { users } = (await response.json()) as { users: { email: string }[] };
   return users.filter((user) => user.email === email);
+}
+
+/**
+ * Bans (deactivates) a user through the admin API. Only use it on throwaway
+ * users from `createAgent`, never on the seeded ones.
+ */
+export async function banUser(
+  adminRequest: APIRequestContext,
+  userId: string,
+): Promise<void> {
+  const response = await adminRequest.post('/api/auth/admin/ban-user', {
+    data: { userId, banReason: 'e2e test' },
+    headers: ORIGIN_HEADER,
+  });
+  expect(response.status(), `ban user ${userId}`).toBe(200);
 }

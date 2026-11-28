@@ -1,4 +1,9 @@
-import { roleLabel, userInitials } from '../user-display';
+import {
+  avatarColor,
+  avatarColors,
+  roleLabel,
+  userInitials,
+} from '../user-display';
 
 describe('userInitials', () => {
   it.each([
@@ -26,5 +31,32 @@ describe('roleLabel', () => {
   it('passes unknown roles through and handles a missing role', () => {
     expect(roleLabel('auditor')).toBe('auditor');
     expect(roleLabel(null)).toBeNull();
+  });
+});
+
+describe('avatarColor', () => {
+  it('has at least 6 distinct colours', () => {
+    expect(new Set(avatarColors).size).toBeGreaterThanOrEqual(6);
+  });
+
+  it('always gives the same user the same colour, ignoring case', () => {
+    expect(avatarColor('Maya.Thompson@example.com')).toBe(
+      avatarColor('maya.thompson@example.com'),
+    );
+  });
+
+  it('only returns palette colours', () => {
+    for (let i = 0; i < 100; i++) {
+      expect(avatarColors).toContain(avatarColor(`user${i}@example.com`));
+    }
+  });
+
+  it('spreads users across the palette', () => {
+    const used = new Set(
+      Array.from({ length: 40 }, (_, i) =>
+        avatarColor(`agent${i}@example.com`),
+      ),
+    );
+    expect(used.size).toBe(avatarColors.length);
   });
 });
