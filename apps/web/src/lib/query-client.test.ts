@@ -1,3 +1,4 @@
+import { apiNetworkError } from '@/test/api-mocks';
 import { HttpError, InvalidResponseError } from './api';
 import { shouldRetry } from './query-client';
 
@@ -14,7 +15,7 @@ describe('shouldRetry', () => {
 
   it.each([
     ['a 5xx', new HttpError('/api/x', 503)],
-    ['a network error', new TypeError('Failed to fetch')],
+    ['a network error', apiNetworkError()],
   ])('retries %s twice, then gives up', (_, error) => {
     expect(shouldRetry(0, error)).toBe(true);
     expect(shouldRetry(1, error)).toBe(true);

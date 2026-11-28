@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import App from './App';
 import { ThemeProvider } from '@/modules/theme/theme-provider';
+import { apiErrorResponse, apiResponse, mockApiGet } from '@/test/api-mocks';
 
 type FakeSession = {
   user: { name: string; email: string; role: string; image: string | null };
@@ -54,8 +55,8 @@ function renderApp(path = '/') {
 }
 
 function mockHealthOk() {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-    Response.json({ status: 'ok', timestamp: new Date().toISOString() }),
+  mockApiGet().mockResolvedValue(
+    apiResponse({ status: 'ok', timestamp: new Date().toISOString() }),
   );
 }
 
@@ -147,9 +148,7 @@ describe('home page', () => {
   });
 
   it('shows "unreachable" when the API is down', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(null, { status: 503 }),
-    );
+    mockApiGet().mockRejectedValue(apiErrorResponse(503));
     renderApp('/');
 
     expect(await screen.findByText('unreachable')).toBeInTheDocument();

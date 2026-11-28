@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserRole, UserStatus, type UserListItem } from '@helpdesk/shared';
+import { apiErrorResponse, apiResponse, mockApiGet } from '@/test/api-mocks';
 import { UsersList } from '../users-list';
 
 const admin: UserListItem = {
@@ -24,9 +25,7 @@ const liam: UserListItem = {
 };
 
 function mockUsers(users: unknown[]) {
-  return vi
-    .spyOn(globalThis, 'fetch')
-    .mockResolvedValue(Response.json({ users }));
+  return mockApiGet().mockResolvedValue(apiResponse({ users }));
 }
 
 function renderList(currentUserId?: string) {
@@ -52,11 +51,11 @@ function roleCell(row: HTMLElement) {
 
 describe('UsersList', () => {
   it('fetches the users from the API', async () => {
-    const fetch = mockUsers([admin]);
+    const get = mockUsers([admin]);
     renderList();
 
     await screen.findByRole('table');
-    expect(fetch).toHaveBeenCalledWith('/api/users');
+    expect(get).toHaveBeenCalledWith('/api/users');
   });
 
   it('shows each user with their email, role, status and date added', async () => {
@@ -110,10 +109,9 @@ describe('UsersList', () => {
   });
 
   it('shows an error with a retry when loading fails', async () => {
-    const fetch = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce(new Response(null, { status: 500 }))
-      .mockResolvedValue(Response.json({ users: [admin] }));
+    const get = mockApiGet()
+      .mockRejectedValueOnce(apiErrorResponse(500))
+      .mockResolvedValue(apiResponse({ users: [admin] }));
     renderList();
 
     expect(
@@ -122,7 +120,7 @@ describe('UsersList', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
 
     expect(await screen.findByText('Helpdesk Admin')).toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(get).toHaveBeenCalledTimes(2);
   });
 
   it('treats a response that does not match the schema as an error', async () => {

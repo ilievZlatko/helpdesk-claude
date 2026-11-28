@@ -1,49 +1,51 @@
 import { healthResponseSchema } from '@helpdesk/shared';
+import {
+  apiErrorResponse,
+  apiNetworkError,
+  apiResponse,
+  mockApiGet,
+} from '@/test/api-mocks';
 import { HttpError, InvalidResponseError, getJson } from './api';
 
 const health = { status: 'ok', timestamp: '2026-11-28T10:00:00.000Z' };
 
 describe('getJson', () => {
-  it('returns the parsed body', async () => {
-    const fetch = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(Response.json(health));
+  it('GETs the URL and returns the parsed body', async () => {
+    const get = mockApiGet().mockResolvedValue(apiResponse(health));
 
     await expect(getJson('/api/health', healthResponseSchema)).resolves.toEqual(
       health,
     );
-    expect(fetch).toHaveBeenCalledWith('/api/health');
+    expect(get).toHaveBeenCalledWith('/api/health');
   });
 
-  it('throws an HttpError with the status for a non-2xx response', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(null, { status: 403 }),
-    );
+  it.each([403, 404, 500, 503])(
+    'throws an HttpError with the status for a %i',
+    async (status) => {
+      mockApiGet().mockRejectedValue(apiErrorResponse(status));
 
-    const error = await getJson('/api/health', healthResponseSchema).catch(
-      (e: unknown) => e,
-    );
-    expect(error).toBeInstanceOf(HttpError);
-    expect((error as HttpError).status).toBe(403);
-  });
+      const error = await getJson('/api/health', healthResponseSchema).catch(
+        (e: unknown) => e,
+      );
+      expect(error).toBeInstanceOf(HttpError);
+      expect((error as HttpError).status).toBe(status);
+    },
+  );
 
   it('throws an InvalidResponseError for a body that does not match', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      Response.json({ status: 'maybe' }),
-    );
+    mockApiGet().mockResolvedValue(apiResponse({ status: 'maybe' }));
 
     await expect(
       getJson('/api/health', healthResponseSchema),
     ).rejects.toBeInstanceOf(InvalidResponseError);
   });
 
-  it('lets network failures through', async () => {
-    vi.spyOn(globalThis, 'fetch').mockRejectedValue(
-      new TypeError('Failed to fetch'),
-    );
+  it('lets network failures through as they are', async () => {
+    const networkError = apiNetworkError();
+    mockApiGet().mockRejectedValue(networkError);
 
-    await expect(
-      getJson('/api/health', healthResponseSchema),
-    ).rejects.toBeInstanceOf(TypeError);
+    await expect(getJson('/api/health', healthResponseSchema)).rejects.toBe(
+      networkError,
+    );
   });
 });
