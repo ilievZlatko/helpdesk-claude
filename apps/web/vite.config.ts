@@ -14,9 +14,10 @@ export default defineConfig({
   server: {
     port: 5173,
     // Forward API calls to NestJS so the browser sees one origin
-    // (needed for session cookies in development).
+    // (needed for session cookies in development). `vite preview` uses the
+    // same proxy; the Playwright run points it at its own API.
     proxy: {
-      '/api': 'http://localhost:3000',
+      '/api': process.env['API_PROXY_TARGET'] ?? 'http://localhost:3000',
     },
   },
 });

@@ -21,6 +21,10 @@
     "typecheck": {
       "dependsOn": ["^build", "db:generate"]
     },
+    "e2e": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
     "test": {
       "dependsOn": ["^build", "db:generate"],
       "outputs": ["coverage/**"]

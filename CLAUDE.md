@@ -21,6 +21,7 @@ pnpm workspace + Turborepo monorepo:
 ```
 apps/api         NestJS 12 backend (ESM). Read apps/api/AGENTS.md before working here.
 apps/web         React 19 + Vite 8 + Tailwind 4 + shadcn/ui + TanStack Query
+apps/e2e         Playwright end-to-end tests against both apps (own ports and database)
 packages/shared  Zod schemas, enums, and types shared by api and web (@helpdesk/shared)
 ```
 
@@ -41,6 +42,7 @@ pnpm db:generate  # regenerate the Prisma client
 pnpm db:seed      # ensure the admin (ADMIN_EMAIL/ADMIN_PASSWORD) + dev agents (SEED_USER_PASSWORD); idempotent
 pnpm db:studio    # Prisma Studio
 pnpm --filter @helpdesk/api test:e2e   # needs Postgres running
+pnpm e2e          # Playwright (apps/e2e): builds, resets helpdesk_test, runs; needs Postgres + `pnpm --filter @helpdesk/e2e install-browsers` once
 ```
 
 Before calling a task done, run `pnpm lint && pnpm typecheck && pnpm test` (and `pnpm build` for config or dependency changes).
@@ -56,7 +58,7 @@ Before calling a task done, run `pnpm lint && pnpm typecheck && pnpm test` (and 
   - Code is organized as feature modules (`src/<feature>/<feature>.module.ts`), and all routes live under the global `/api` prefix.
   - Validate requests with Zod schemas from `@helpdesk/shared` via NestJS's built-in `StandardSchemaValidationPipe`; don't use `class-validator` or `nestjs-zod`.
   - Environment variables are validated in `src/config/env.ts`. Add every new variable there and to `.env.example`.
-  - Auth is better-auth (`src/auth/auth.ts`) through `@thallesp/nestjs-better-auth`. Every route needs a session by default (global `AuthGuard`); mark public routes with `@AllowAnonymous()` and read the session with `@Session()`. The app is created with `bodyParser: false` (in `main.ts` and in e2e tests). Better-auth's own routes live under `/api/auth/*`. Sign-up is disabled (internal tool); create users through the seed (`prisma/seed-users.ts`) or the admin plugin, not the sign-up route. Roles are `admin | agent` (better-auth admin plugin). Use the `UserRole` enum from `@helpdesk/shared` (`UserRole.Admin`, `UserRole.Agent`) instead of string literals; protect admin-only routes with `@Roles([UserRole.Admin])`.
+  - Auth is better-auth (`src/auth/auth.ts`) through `@thallesp/nestjs-better-auth`. Every route needs a session by default (global `AuthGuard`); mark public routes with `@AllowAnonymous()` and read the session with `@Session()`. The app is created with `bodyParser: false` (in `main.ts` and in e2e tests). Better-auth's own routes live under `/api/auth/*`. Sign-up is disabled (internal tool); create users through the seed (`prisma/seed-users.ts`) or the admin plugin, not the sign-up route. Roles are `admin | agent` (better-auth admin plugin). Use the `UserRole` enum from `@helpdesk/shared` (`UserRole.Admin`, `UserRole.Agent`) instead of string literals; protect admin-only routes with `@Roles([UserRole.Admin])`. Sign-in rate limiting (stored in Postgres) is on only when `NODE_ENV=production`, so dev and all test runs never hit it; tests that need it build their own auth instance with `NODE_ENV: 'production'` (see `test/rate-limit.e2e-spec.ts`).
 - **Database (Prisma 7, PostgreSQL):**
   - Use the stable Prisma 7.x line. npm's `latest` tag for the `prisma` CLI points at an 8.0 release candidate, so always install with an explicit `@^7` range.
   - Schema: `apps/api/prisma/schema.prisma`. Config, including the database URL: `apps/api/prisma7.config.ts`, which loads `.env` via `dotenv`. Prisma 7 does not load `.env` itself.
@@ -72,10 +74,11 @@ Before calling a task done, run `pnpm lint && pnpm typecheck && pnpm test` (and 
   - Pages (one per route) are single files, `src/pages/<name>.page.tsx` (e.g. `login.page.tsx`), imported as `@/pages/<name>.page` (no folder or `index.ts`). They stay thin and compose pieces from modules. Modules never import pages. Something only one page uses can stay in that page's file; once it grows or is reused, move it into a module.
   - Code is organized in feature modules under `src/modules/<module>/` (`auth`, `routes`, `layouts`, `theme`). A module's files sit directly in its folder (`<name>.tsx`, plain `.ts` for non-UI code), and its tests go in the module's `test/` folder (`src/modules/<module>/test/<name>.test.tsx`). There are no `index.ts` barrels: import the file itself, e.g. `@/modules/auth/login-form`, and use relative paths (`./theme`) inside the same module.
   - Components a module uses only internally go in `src/modules/<module>/components/`; don't import those from outside the module. Avoid circular dependencies between modules (today: `routes` depends on `auth`; `layouts` on `auth` and `theme`). `src/components/ui` and `src/hooks` (shadcn) stay flat because the shadcn CLI writes there. App components that don't belong to a module (e.g. `login-background.tsx`) go directly in `src/components/<name>.tsx`.
-  - In dev, the Vite server proxies `/api` to the API, so use relative `/api/...` URLs.
+  - In dev, the Vite server proxies `/api` to the API, so use relative `/api/...` URLs. The proxy target defaults to `http://localhost:3000` and can be changed with `API_PROXY_TARGET` (the Playwright run uses this for `vite preview`).
   - Theme: light / dark / system via `ThemeProvider` (theme module, `src/modules/theme/`; state in `theme.ts`), which toggles the `dark` class on `<html>`. Style dark mode with theme tokens (`bg-background`, `text-muted-foreground`, …) or `dark:` variants. An inline script in `index.html` applies the saved theme before first paint; keep its storage key in sync with `THEME_STORAGE_KEY`.
   - Auth (`src/modules/auth/`) uses the better-auth React client (`auth-client.ts`): `authClient.useSession()`, `signIn.email()`, `signOut()`. Routes are declared in `src/App.tsx` with React Router; pages that need a session go under `<RequireAuth />` (routes module) inside `AppLayout` (layouts module); the login page goes under `<RequireGuest />`. Role-restricted pages go under `<RequireRole roles={[UserRole.Admin]} />` inside `<RequireAuth />` (it sends other users home); hide links to them from users without the role. This is UI only: the API enforces roles itself.
 - **Tests:** Vitest everywhere (`vi.fn()`, not `jest.fn()`). Unit tests sit next to the code (`*.spec.ts` in api, `*.test.ts` in shared), except in web modules, where they go in the module's `test/` folder (`*.test.ts(x)`). Cover changed behavior with focused tests.
+- **Playwright (`apps/e2e`):** browser tests go in `apps/e2e/tests/*.spec.ts`; import `test`/`expect` from `@playwright/test` and the seeded credentials and URLs from `../env.ts`. Use relative URLs (`baseURL` is the web app). Every run resets the `helpdesk_test` database (never the dev database) and starts its own API (:3001) and `vite preview` (:5174); see `playwright.config.ts`. Tests run serially on one shared database. Not part of `pnpm test`.
 - **Formatting:** Prettier with single quotes and trailing commas. Run `pnpm format` before finishing.
 
 ## Design language (web)
