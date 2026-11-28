@@ -8,6 +8,7 @@ AI-powered ticket management system. See [project-scope.md](project-scope.md), [
 apps/
   api/        NestJS 12 backend (ESM, Vitest) — http://localhost:3000/api
   web/        React 19 + Vite 8 + Tailwind 4 + shadcn/ui — http://localhost:5173
+  e2e/        Playwright end-to-end tests (run against both apps)
 packages/
   shared/     Zod schemas and types shared by api and web
 ```
@@ -60,6 +61,7 @@ All scripts run across the workspace through Turborepo:
 | `pnpm lint`         | Lint with oxlint                      |
 | `pnpm typecheck`    | Type-check all packages               |
 | `pnpm test`         | Run unit tests (Vitest)               |
+| `pnpm e2e`          | Run the Playwright tests (see below)  |
 | `pnpm format`       | Format with Prettier                  |
 | `pnpm db:up / down` | Start / stop Postgres                 |
 | `pnpm db:migrate`   | Create and apply a migration (Prisma) |
@@ -68,6 +70,26 @@ All scripts run across the workspace through Turborepo:
 | `pnpm db:studio`    | Open Prisma Studio                    |
 
 Run a script in one package with `--filter`, e.g. `pnpm --filter @helpdesk/api test:e2e`.
+
+## End-to-end tests (Playwright)
+
+`apps/e2e` holds the Playwright tests (`apps/e2e/tests/*.spec.ts`). They run against production builds of the API and the web app, on their own ports and their own database, so they can run while `pnpm dev` is up and never touch your dev data.
+
+```bash
+pnpm db:up                                       # Postgres must be running
+pnpm --filter @helpdesk/e2e install-browsers     # once: downloads Chromium
+pnpm e2e                                         # builds both apps, then runs the tests
+pnpm --filter @helpdesk/e2e e2e:ui               # Playwright UI mode (build first with pnpm build)
+pnpm --filter @helpdesk/e2e e2e:report           # open the last HTML report
+```
+
+Each run:
+
+1. Creates the `helpdesk_test` database in the docker-compose Postgres if it is missing, applies the migrations, empties every table, and seeds the admin and dev agents (`apps/e2e/scripts/prepare-db.ts`). It refuses any database whose name doesn't end in `_test`.
+2. Starts the API on http://localhost:3001 (`NODE_ENV=test`, with a fresh random `BETTER_AUTH_SECRET`; sign-in rate limiting is on in production only). It does not read `apps/api/.env`.
+3. Serves the built web app with `vite preview` on http://localhost:5174, proxying `/api` to that API.
+
+Test settings and the seeded credentials are in `apps/e2e/env.ts`. Override them with `E2E_DATABASE_URL`, `E2E_API_PORT`, `E2E_WEB_PORT`, `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` and `E2E_SEED_USER_PASSWORD`.
 
 ## Notes
 

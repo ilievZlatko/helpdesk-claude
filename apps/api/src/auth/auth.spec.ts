@@ -14,19 +14,16 @@ const env: AuthEnv = {
 };
 
 describe('createAuth rate limiting', () => {
-  it.each(['development', 'production'] as const)(
-    'is on in %s, stored in the database',
-    (NODE_ENV) => {
-      const { rateLimit } = createAuth(prisma, { ...env, NODE_ENV }).options;
-      expect(rateLimit).toMatchObject({ enabled: true, storage: 'database' });
-    },
-  );
-
-  it('is off in automated tests', () => {
+  it('is on in production, stored in the database', () => {
     const { rateLimit } = createAuth(prisma, {
       ...env,
-      NODE_ENV: 'test',
+      NODE_ENV: 'production',
     }).options;
+    expect(rateLimit).toMatchObject({ enabled: true, storage: 'database' });
+  });
+
+  it.each(['development', 'test'] as const)('is off in %s', (NODE_ENV) => {
+    const { rateLimit } = createAuth(prisma, { ...env, NODE_ENV }).options;
     expect(rateLimit?.enabled).toBe(false);
   });
 
