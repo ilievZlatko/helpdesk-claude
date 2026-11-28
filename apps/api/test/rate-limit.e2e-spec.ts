@@ -1,7 +1,7 @@
 // Sign-in rate limiting against the real database (rateLimit.storage =
-// "database"). The app under test (AppModule) runs with NODE_ENV=test, where
-// rate limiting is off, so this file builds its own auth instance with it on
-// and calls better-auth's handler directly.
+// "database"). Rate limiting is on in production only and the app under test
+// (AppModule) runs with NODE_ENV=test, so this file builds its own auth
+// instance with NODE_ENV=production and calls better-auth's handler directly.
 import 'dotenv/config';
 import { randomInt } from 'node:crypto';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -29,7 +29,7 @@ function clientIp() {
 function authWith(overrides: Partial<AuthEnv> = {}) {
   return createAuth(prisma, {
     ...env,
-    NODE_ENV: 'development', // rate limiting on
+    NODE_ENV: 'production', // rate limiting on
     CLIENT_IP_HEADER: undefined,
     TRUSTED_PROXIES: undefined,
     ...overrides,

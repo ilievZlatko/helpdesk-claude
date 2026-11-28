@@ -21,8 +21,8 @@ export type AuthEnv = Pick<
  * `session` table) and checked on every request: there is no secondary
  * storage and no cookie cache.
  *
- * Rate limiting (incl. 3 sign-in attempts per 10 s per client IP) is on
- * everywhere except automated tests, stored in Postgres (`rate_limit`) so it
+ * Rate limiting (incl. 3 sign-in attempts per 10 s per client IP) is on in
+ * production only, stored in Postgres (`rate_limit`) so it
  * holds across API instances and restarts. The client IP comes from
  * CLIENT_IP_HEADER or, behind TRUSTED_PROXIES, from X-Forwarded-For.
  *
@@ -42,10 +42,11 @@ export function createAuth(prisma: PrismaClient, env: AuthEnv) {
       disableSignUp: true,
     },
     rateLimit: {
-      // Explicit: better-auth only enables it when process.env.NODE_ENV is
-      // "production", so a missing NODE_ENV would silently turn it off. Off
-      // in tests, which sign in many times from one address.
-      enabled: env.NODE_ENV !== 'test',
+      // Production only, so development, tests and e2e runs (which sign in
+      // many times from one address) never hit the limit. Based on the
+      // validated NODE_ENV rather than better-auth's own process.env check;
+      // validateEnv requires "production" whenever BETTER_AUTH_URL is https.
+      enabled: env.NODE_ENV === 'production',
       storage: 'database',
     },
     advanced: {
