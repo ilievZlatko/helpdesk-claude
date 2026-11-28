@@ -60,3 +60,51 @@ jobs:
 
       - name: API e2e tests
         run: pnpm --filter @helpdesk/api test:e2e
+
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TELEMETRY_DISABLED: 1
+      # The Playwright run creates, migrates, empties and seeds this database
+      # itself (apps/e2e/scripts/prepare-db.ts) and starts its own API and web
+      # server; see apps/e2e/env.ts for the other settings.
+      E2E_DATABASE_URL: postgresql://helpdesk:helpdesk@localhost:5432/helpdesk_test
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: helpdesk
+          POSTGRES_PASSWORD: helpdesk
+          POSTGRES_DB: helpdesk
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U helpdesk -d helpdesk"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium for Playwright
+        run: pnpm --filter @helpdesk/e2e exec playwright install --with-deps chromium
+
+      - name: Playwright e2e tests
+        run: pnpm e2e
+
+      - name: Upload the Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: apps/e2e/playwright-report/
+          retention-days: 14
