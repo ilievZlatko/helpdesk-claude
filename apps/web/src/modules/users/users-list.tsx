@@ -63,21 +63,29 @@ function UsersTable({
   currentUserId?: string;
 }) {
   return (
-    <Table>
+    // Fixed layout: Role, Status and Added get set shares of the width and
+    // User takes the rest, truncating long names and emails, so nothing
+    // overflows. Phones show User and Status (with the role under the email);
+    // tablets add Role; desktops add Added. Leaves room for a narrow actions
+    // column (a "⋯" menu, w-12) at the end.
+    <Table className="table-fixed">
       <TableHeader>
         <TableRow>
           <TableHead>User</TableHead>
-          <TableHead className="hidden sm:table-cell">Role</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="hidden sm:table-cell">Added</TableHead>
+          <TableHead className="hidden sm:table-cell sm:w-[16%] lg:w-[15%]">
+            Role
+          </TableHead>
+          <TableHead className="w-32 sm:w-[26%] lg:w-[18%]">Status</TableHead>
+          <TableHead className="hidden lg:table-cell lg:w-[17%]">
+            Added
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {users.map((user) => (
           <TableRow key={user.id}>
-            {/* Takes the spare width and truncates, so the other columns
-                always fit; on small screens it also shows the role. */}
-            <TableCell className="w-full max-w-0">
+            {/* On small screens it also shows the role. */}
+            <TableCell>
               <div className="flex items-center gap-3">
                 <UserAvatar user={user} colorful />
                 <div className="min-w-0">
@@ -104,7 +112,7 @@ function UsersTable({
             <TableCell>
               <StatusBadge status={user.status} />
             </TableCell>
-            <TableCell className="hidden text-muted-foreground sm:table-cell">
+            <TableCell className="hidden text-muted-foreground lg:table-cell">
               <time dateTime={user.createdAt}>
                 {dateFormat.format(new Date(user.createdAt))}
               </time>
